@@ -1,0 +1,191 @@
+{% assign classes = 'shopify-product-form' %}
+{% for tag in product.tags %}
+  {% if tag contains 'persistent_note_' %}
+    {% assign has_persistent_note = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% if product.compare_at_price > product.price %}
+  {% assign classes = classes | append: ' on-sale' %}
+{% endif %}
+{% form 'product', product, id: 'add-to-cart-form', data-cart-submit: true, data-productid: product.id, class: classes %}
+
+  {% if product.tags contains 'final-sale:1' %}
+    <div class="tu ls2 fw2 product__final-sale">Final Sale - No Returns</div>
+    <input type="hidden" id="isFinalSale" name="properties[isFinalSale]" value="Final Sale - No Returns" />
+  {% endif %}
+
+  {% if has_persistent_note == true %}
+    <div class="product__notes">
+      {% for tag in product.tags %}
+        {% if tag contains 'persistent_note' %}
+          {% assign note = tag | remove: 'persistent_note_' %}
+          <h4 class="product__note persistent-note tu ls2 fw1">{{ note }}</h4>
+          <input type="hidden" name="properties[persistent_note]" value="{{ note }}" />
+          {% break %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="product-option-rows">
+    {% for option in product.options_with_values %}
+      {% assign option_index = forloop.index %}
+      {% assign option_position = option.position | prepend: 'option' %}
+      {% assign option_name_handle = option.name | handle %}
+
+      {% unless option_name_handle == 'title' %}
+
+        {% if option_name_handle == 'color' %}
+          <div class="product-option-row product-option-row--{{ option.values.size }} product-option-row--{{ option.name | handle}} product-option-row--swatches">
+            <div class="option-name p-sm tu fw2 ls2" id="option-name--option{{ option.position }}">{{ option.name }}: <span class="fw1">{{ current_variant[option_position] }}</span></div>
+            <div class="swatch option-field">
+              {% for value in option.values  %}
+                {% assign option_is_available = false %}
+                {% assign swatch_override = '' %}
+
+                {% for variant in product.variants %}
+                  {% if variant[option_position] == value %}
+                    {% if variant.available == true %}
+                      {% assign option_is_available = true %}
+                    {% endif %}
+                    {% if variant.metafields.milly.custom_swatch != blank and swatch_override == '' %}
+                      {% assign swatch_override = variant.metafields.milly.custom_swatch %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                {% comment %}Hiding variants with NS-{% endcomment %}
+                {%- unless value contains 'NS' -%}
+                  <div class="swatch-element {% if option.selected_value == value %}selected-swatch{%endif%} swatch-element--{{ value | handle }}{% if option_is_available == false %} swatch--unavailable{% endif %}">
+                    <input type="radio" name="single-option-select-{{ option_index }}" id="swatch-{{ option_index }}-{{ value | handle }}" value="{{ value | escape }}" data-index="option{{ option_index }}" class="single-option-select visually-hidden" {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="swatch-{{ option_index }}-{{ value | handle }}" class="h7" tabindex="0" >
+                      {% assign swatch_img = '' %}
+
+                      {% comment %} Default swatch uses color value handle {% endcomment %}
+                      {% assign swatch_img = value | handleize | prepend: 'swatch_' | append: '.jpg' %}
+
+                      {% comment %} If variant override exists, use it instead {% endcomment %}
+                      {% if swatch_override != '' %}
+                        {% assign swatch_img = swatch_override %}
+                      {% endif %}
+
+                      <span class="visually-hidden">{{ value }}</span>
+                      <img role="button" src="{{ swatch_img | file_img_url: '20x20', crop: 'center'  }}" alt="{{ value }} Swatch" onError="this.src = '{{ 'swatch_default.jpg' | asset_img_url: '20x20', crop: 'center' }}';" />
+                    </label>
+                  </div>
+                {%- endunless -%}
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+    		          <div class="{% if settings.use_color_swatch %}product-option-swatch {% else %} product-option-row {% endif %}product-option-row--{{ option.values.size }} product-option-row--{{ option.name | handle }}">
+            {% if settings.use_color_swatch %}
+            <div class="option-name p-sm tu fw2 ls2"><span>Select {{ option.name }}</span></div>
+            <div {% if settings.use_color_swatch %}id="swathes-load-id"{% endif %}>
+                        {%- for value in option.values -%}
+                  {%- assign option_is_available = false -%}
+              		{%- assign option_id = '' -%}
+                  {%- for variant in product.variants -%}
+                    {%- if variant[option_position] == value -%}
+              		{%- assign option_id = variant.id -%}
+                      {%- if variant.available -%}
+                        {%- assign option_is_available = true -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+            
+                  <div id="{{option_id}}" data-varaint-id="{{option_id}}" class="dropdown__option{% unless option_is_available %} dropdown__option--sold-out{% endunless %}" tabindex="0" data-label="{{ value }}" data-position="{{ option.position}}" data-value="{{ value | escape }}">
+                    <input type="radio" name="single-option-select-{{ option_index }}" id="swatch-{{ option_index }}-{{ value | handle }}" value="{{ value | escape }}" data-index="option{{ option_index }}" class="single-option-select visually-hidden" {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="swatch-{{ option_index }}-{{ value | handle }}"><div>{{ value }}</div></label>
+                  </div>
+                {%- endfor -%}
+                        </div>
+            {% else %}
+            
+            <div class="dropdown">
+              <div class="dropdown__label ls2" tabindex="0" role="button">
+                <div>
+                  <span>{{ option.name }}:</span>
+                  <span>{{ option.selected_value | default: 'Select a Size'}}</span>
+                </div>
+                {% include 'icon' handle: 'chevron-down' %}
+              </div>
+              <div class="dropdown__options">
+                {%- for value in option.values -%}
+                  {%- assign option_is_available = false -%}
+                  {%- for variant in product.variants -%}
+                    {%- if variant[option_position] == value -%}
+                      {%- if variant.available -%}
+                        {%- assign option_is_available = true -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  <div class="dropdown__option{% unless option_is_available %} dropdown__option--sold-out{% endunless %}{% if option.selected_value == value %} dropdown__option--selected{% endif %}" tabindex="0" data-label="{{ value }}" data-position="{{ option.position}}" data-value="{{ value | escape }}">
+                    <input type="radio" name="single-option-select-{{ option_index }}" id="swatch-{{ option_index }}-{{ value | handle }}" value="{{ value | escape }}" data-index="option{{ option_index }}" class="single-option-select visually-hidden" {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="swatch-{{ option_index }}-{{ value | handle }}" class="dropdown__option-label{% unless option_is_available %} back-in-stock-trigger{% endunless %}"><div>{{ value }}</div> {% unless option_is_available %}<span>Sold Out </span>{% unless product.compare_at_price_max > product.price %}<span>Notify Me When Available</span>{% endunless %}{% endunless %}</label>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+    
+    
+    
+    
+        {% endif %}
+      {% endunless %}
+    {% endfor %}
+  </div>
+<div id="back-stock-limited" class="red-color"><p>LIMITED QUANTITIES!</p></div>
+{% if settings.use_color_swatch %}
+<a href="JavaScript:void(0);" class="back-in-stock-trigger"><span>Cant find your size?</span></a>
+ {% endif %}
+  {% unless product.type == 'Gift Card' %}
+    <a href="JavaScript:void(0);" class="btn btn--text-only btn--small size-guide-btn size-guide-btn--upper" data-modal-size-guide="{% if product.tags contains 'division:minis' %}minis{% else %}women{% endif %}">Size Guide</a>
+  {% endunless %}
+
+  {% comment %} Main variant drop down (hidden) {% endcomment %}
+  {% if product.variants.size <= 1 %}
+    <input name="id" id="product-select" type="hidden" value="{{ product.variants.first.id }}" data-productid="{{product.id}}" />
+  {% else %}
+    <select name="id" id="product-select" data-productid="{{product.id}}">
+      {% for variant in product.variants %}
+      {% if variant.available %}
+        <option {% if variant == current_variant %} selected="selected" {% endif %} value="{{ variant.id }}">{{ variant.title }}</option>
+        {% else %}
+        <option disabled="disabled">{{ variant.title }} - Sold Out</option>
+      {% endif %}
+      {% endfor %}
+    </select>
+  {% endif %}
+
+  {% comment %} Removed on 2/23/21 at request of client. May renable after launch  {% endcomment %}
+  {% comment %}
+  {% unless product.type == 'Gift Card' %}
+    <div class="shipping-estimate shipping-estimate--hidden">
+      <p class="p-sm tu ls1 ls2-m"><strong>Estimated Delivery Date:</strong> <span></span></p>
+    </div>
+  {% endunless %}
+  {% endcomment %}
+
+  {% if product.metafields.accentuate["preorder"] != blank %}
+    <input type="hidden" id="deliverydate" name="properties[delivery]" value="{{product.metafields.accentuate.preorder}}" />
+  {% endif %}
+
+  <div class="product-action">
+    <div class="product-action__btn">
+      <input type="hidden" name="quantity" value="1" />
+      <button name="add" id="add-to-cart" type="submit" class="btn btn--block btn--secondary">
+        <span id="add-to-cart-text" class="add-to-cart-text" data-add-to-cart-text="Add To Bag" data-sold-out-text="Sold Out">Add To Bag</span>
+      </button>
+    </div>
+  </div>
+  {% if product.metafields.accentuate["preorder"] != blank %}
+    <div id="pre-order">{{product.metafields.accentuate.preorder}}</div>
+  {% endif %}
+{% endform %}

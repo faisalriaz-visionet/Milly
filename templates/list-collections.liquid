@@ -1,0 +1,36 @@
+<main class="content content--collection" role="main">
+  <div class="container--wide">
+    <div class="collection-header">
+      <h1 class="h2 tu ls2">Shop by Collection</h1>
+    </div>
+
+    <div class="collection-main" role="main">
+      {% paginate collections by 96 %}
+        <div class="products row row--gutters">
+          {% for collection in collections %}
+            <article class="column column--xs-6 column--md-4 product product-{{ forloop.index }}">
+              <div class="product__content">
+                <a href="{{ collection.url }}" class="product__image-wrapper" title="{{ collection.title | strip_html | escape }}">
+                  <img class="product__image" src="{{ collection.products.first.featured_image.src | product_img_url: '1200x' }}" alt="{{ collection.featured_image.alt | escape }}">
+                </a>
+                <header class="product__header clearfix{% if settings.product_header_centered %} center{% endif %}">
+                  <h2 class="product__title">
+                    <a href="{{ collection.url }}" title="{{ collection.title | strip_html | escape }}" itemscope="url">{{ collection.title }}</a>
+                  </h2>
+                  <span class="product__meta">
+                    <span class="product__meta-pricing">
+                      <span class="product__price">{{ collection.products_count }} products</span>
+                    </span>
+                  </span>
+                </header>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+        {% if paginate.pages > 1 %}
+          {% include 'pagination' %}
+        {% endif %}
+      {% endpaginate %}
+    </div>
+  </div>
+</div>

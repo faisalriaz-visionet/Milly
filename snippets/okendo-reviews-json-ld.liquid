@@ -1,0 +1,49 @@
+{% if template contains 'product' %}
+{% liquid
+  assign year = "now" | date: "%Y"
+  assign year = year | times: 1 | plus: 1
+  assign month_day = "now" | date: "%m-%d"
+  assign one_year_in_future = year | append: '-' | append: month_day
+%}
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org/",
+    "@type": "Product",
+    "name": "{{ product.title }}",
+    "image": "https:{{ product.featured_image | product_img_url: '450x450' }}",
+    "description": "{{ product.description | escape | strip_html | strip_newlines }}",
+    "mpn": "{{ product.id }}",
+    "brand": {
+      "@type": "Thing",
+      "name": "{{ product.vendor }}"
+    },
+    "offers": [
+      {% for variant in product.variants %}
+      {
+        "@type": "Offer",
+        "priceCurrency": "{{ shop.currency }}",
+        "priceValidUntil": "{{ one_year_in_future }}",
+        "price": "{{ variant.price | money_without_currency }}",{% if variant.available %}
+        "availability": "http://schema.org/InStock",{% else %}
+        "availability": "http://schema.org/OutOfStock",{% endif %}
+        "sku": "{{ variant.sku }}",
+        "url": "{{ variant.url }}",
+        "seller": {
+          "@type": "Organization",
+          "name": "{{ shop.name }}"
+        }
+      }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]
+    {% if product.metafields.okendo.ReviewAverageValue != '0.0' and product.metafields.okendo.RatingAndReviewCount > 0 %}
+    ,"aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "{{ product.metafields.okendo.ReviewAverageValue }}",
+      "ratingCount": "{{ product.metafields.okendo.RatingAndReviewCount }}",
+      "bestRating":5,
+      "worstRating":1
+    }
+    {% endif %}
+  }
+</script>
+{% endif %}

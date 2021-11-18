@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Customer Accounts",
+    "settings": [
+      {
+        "type": "richtext",
+        "id": "customer_login_message",
+        "label": "Customer Login Message"
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Persistent Note"
+      },
+      {
+        "type": "color",
+        "id": "persistent_note_color",
+        "label": "Persistent Note",
+        "info": "Text that appears from PLP to checkout",
+        "default": "#F90020"
+      }
+    ]
+  },
+  {
+    "name": "Contact",
+    "settings": [
+      {
+        "type": "text",
+        "id": "phone_number",
+        "label": "Contact Phone Number",
+        "default": "1-800-223-2664"
+      },
+      {
+        "type": "text",
+        "id": "email_address",
+        "label": "Contact Email Address",
+        "default": "customercare@milly.com"
+      }
+    ]
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Social Media Accounts"
+      },
+      {
+        "type": "paragraph",
+        "content": "Leave a social account blank to not use within your store."
+      },
+      {
+        "type": "text",
+        "id": "social_facebook",
+        "label": "Facebook Username"
+      },
+      {
+        "type": "text",
+        "id": "social_twitter",
+        "label": "Twitter Handle"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram Username"
+      },
+      {
+        "type": "text",
+        "id": "social_pinterest",
+        "label": "Pinterest Username"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube",
+        "label": "Youtube Username"
+      }
+    ]
+  },
+  {
+    "name": "Product detail",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Color Swatch"
+      },
+      {
+        "type": "checkbox",
+        "id": "use_color_swatch",
+        "label": "Use Color Swatch?",
+        "default": false
+      }
+    ]
+  }
+]

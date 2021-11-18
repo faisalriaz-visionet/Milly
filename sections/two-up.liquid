@@ -1,0 +1,219 @@
+<section class="section section--two-up two-up two-up--{{ section.id }} {{ section.settings.padding_top }} {{ section.settings.padding_bottom }}" {{ section.shopify_attributes }} >
+  <style>.two-up--{{ section.id }} {background-color: {{ section.settings.bg_color }};}</style>
+  {% if section.settings.title != blank %}
+    <div class="section__header two-up__header container--wide">
+      <h2 class="h5 h4-m tu ls4">{{ section.settings.title }}</h2>
+    </div>
+  {% endif %}
+
+  <div class="container--wide two-up__wrapper">
+    <div class="two-up__grid">
+      {% for block in section.blocks %}
+        <div class="two-up__item two-up__item--{{ block.settings.style }} two-up__item--{{ block.id }}" {{ block.shopify_attributes }}>
+          <style>
+            .two-up__item--{{ block.id }} img {max-width:100%;height:auto;aspect-ratio:{{ block.settings.image.width }}/{{ block.settings.image.height }};}
+            .two-up__item--{{ block.id }} .two-up__item-text h2,
+            .two-up__item--{{ block.id }} .two-up__item-text p { color: {{ block.settings.heading_color }};}
+            {% comment %} Only edit button text color if we are text-only button {% endcomment %}
+            {% if block.settings.btn_style == 'btn--text-only' %}
+              .two-up__item--{{ block.id }} .two-up__item-text .btn {color: {{ block.settings.heading_color }}; }
+              .two-up__item--{{ block.id }} .two-up__item-text .btn:hover,
+              .two-up__item--{{ block.id }} .two-up__item-text .btn:focus {color: {{ block.settings.button_text_hover_color }};}
+            {% endif %}
+
+            {% assign bg_opacity = block.settings.bg_overlay_opacity | times: 0.01 %}
+            .two-up__item--{{ block.id }} figure:after { background: linear-gradient(180deg, transparent 75%, {{ block.settings.bg_overlay_color | color_modify: 'alpha', bg_opacity }});}
+
+          </style>
+          <a href="{{ block.settings.link_url }}" title="{{ block.settings.title | default: block.settings.link_text }}">
+            <figure>
+              <img
+                class="lazy"
+                data-src="{{ block.settings.image | img_url: '600x' }}"
+                width="{{ block.settings.image.width }}" 
+                height="{{ block.settings.image.height }}" 
+                alt="{% if block.settings.image.alt != blank %}{{ block.settings.image.alt }}{% else %}{{ block.settings.title }}{% endif %}"
+              />
+              <div class="two-up__item-text">
+                {% if block.settings.title != blank %}
+                  <h2 class="h4 h3-m tu fw1 ls3">{{ block.settings.title }}</h2>
+                {% endif %}
+
+                {% if block.settings.description != blank and block.settings.style == 'beside' %}
+                  {{ block.settings.description }}
+                {% endif %}
+
+                {% if block.settings.link_text != blank %}
+                  <div class="btn {{ block.settings.btn_style }} {{ block.settings.btn_size }}">{{ block.settings.link_text }}</div>
+                {% endif %}
+              </div>
+            </figure>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+{% schema %}
+{
+  "name": "Two Up CTA",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Design Settings"
+    },
+    {
+      "type":"select",
+      "id":"padding_top",
+      "label":"Container Padding Top",
+      "options":[
+        {"label":"None", "value":"padding-top--tight"},
+        {"label":"Tight", "value":"padded-top--tight"},
+        {"label":"Default", "value":"padded-top--default"},
+        {"label":"Large", "value":"padded-top--large"}
+      ],
+      "default":"padded-top--default"
+    },
+    {
+      "type":"select",
+      "id":"padding_bottom",
+      "label":"Container Padding Bottom",
+      "options":[
+        {"label":"None", "value":"padded-bottom--none"},
+        {"label":"Tight", "value":"padded-bottom--tight"},
+        {"label":"Default", "value":"padded-bottom--default"},
+        {"label":"Large", "value":"padded-bottom--large"}
+      ],
+      "default":"padded-bottom--default"
+    },
+    {
+      "type":"color",
+      "id":"bg_color",
+      "label":"Background Color",
+      "default":"#FFF"
+    },
+    {
+      "type":"color",
+      "id":"heading_color",
+      "label":"Section Heading Color",
+      "default":"#000000"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type":"text",
+      "id":"title",
+      "label":"Heading",
+      "info":"Leave blank to hide."
+    }
+  ],
+  "max_blocks":2,
+  "blocks":[
+    {
+      "type":"cta",
+      "name":"CTA",
+      "settings":[
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Display Style",
+          "options": [
+            {"value": "overlay", "label": "Text Overlay"},
+            {"value": "beneath", "label": "Text Beneath"},
+            {"value": "beside",  "label": "Text Beside"}
+          ],
+          "default": "overlay"
+        },
+        {
+          "type":"image_picker",
+          "id":"image",
+          "label":"Image",
+          "info":"Image should be JPG format, at least 1200px wide"
+        },
+        {
+          "type":"color",
+          "id":"bg_overlay_color",
+          "label":"Image Overlay Color",
+          "default":"#222"
+        },
+        {
+          "type":"range",
+          "id":"bg_overlay_opacity",
+          "label":"Image Overlay Opacity",
+          "min":0,
+          "max":100,
+          "unit":"%",
+          "step":10,
+          "default":0
+        },
+        {
+          "type":"color",
+          "id":"heading_color",
+          "label":"Text Color",
+          "default":"#fff"
+        },
+        {
+          "type":"color",
+          "id":"button_text_hover_color",
+          "label":"Button Text Hover Color",
+          "default":"#000"
+        },
+        {
+          "type":"text",
+          "id":"title",
+          "label":"Heading",
+          "info":"Leave blank to hide"
+        },
+        {
+          "type":"richtext",
+          "id":"description",
+          "label":"Description",
+          "info":"Leave blank to hide"
+        },
+        {
+          "type":"text",
+          "id":"link_text",
+          "label":"Link Text"
+        },
+        {
+          "type":"url",
+          "id":"link_url",
+          "label":"CTA Link URL"
+        },
+        {
+          "type":"select",
+          "id":"btn_style",
+          "label":"Button Style",
+          "options":[
+            {"label":"Primary", "value":""},
+            {"label":"Secondary", "value":"btn--secondary"},
+            {"label":"Tertiary", "value":"btn--tertiary"},
+            {"label":"Text Only", "value":"btn--text-only"}
+          ],
+          "default":"btn--text-only"
+        },
+        {
+          "type":"select",
+          "id":"btn_size",
+          "label":"Button Size",
+          "options":[
+            {"label":"Small", "value":"btn--small"},
+            {"label":"Default", "value":""},
+            {"label":"Large", "value":"btn--large"}
+          ],
+          "default":"btn--large"
+        }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "Two Up CTA",
+    "category": "Content"
+  }]
+}
+{% endschema %}
+

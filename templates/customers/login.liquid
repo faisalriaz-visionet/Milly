@@ -1,0 +1,109 @@
+<main class="content content--no-sidebar">
+  <div class="container">
+    <div class="page-main row row--gutters">
+      <div class="column column--xs-12 column--md-4 column--md-offset-4">
+        <div id="customer-login-form">
+          <div class="page-header">
+            <h1 class="center h2 fw1 tu">Login</h1>
+          </div>
+          {% if settings.customer_login_message != blank %}
+            <div style="padding: 2rem 0;">{{ settings.customer_login_message}}</div>
+          {% endif %}
+          {% form 'customer_login' %}
+            <input type="hidden" name="checkout_url" id="redirect-url" value="" />
+            {{ form.errors | default_errors }}
+            <div class="form__row">
+              <div class="form__field">
+                <label for="customer_email_login" class="login">Email Address</label><br>
+                <input type="email" value="" name="customer[email]" id="customer_email_login" size="30" />
+              </div>
+            </div>
+            {% if form.password_needed %}
+              <div class="form__row">
+                <div class="form__field">
+                  <label for="customer_password" class="login">Password</label><br>
+                  <input type="password" value="" name="customer[password]" id="customer_password" class="password" size="30" /><br>
+                </div>
+                <a href="#" id="forgot-password" class="form__note" title="Forgot Password?">Forgot password?</a>
+              </div>
+            {% endif %}
+            <div class="form__actions center">
+              <input class="btn btn--block" type="submit" value="Sign In" />
+              <a class="btn btn--text-only" href="{{ routes.account_register_url }}" title="Create an Account">Create an Account</a><br>
+              <a class="btn btn--text-only" href="{{ shop.url }}" title="{{ shop.name }}">Return to Store</a>
+            </div>
+
+          {% endform %}
+        </div>
+        <div id="recover-password-form" style="display:none">
+          <div class="page-header">
+            <h2 class="h4">Forgot Password</h2>
+          </div>
+          <p>We will send you an email to reset your password.</p>
+          {% form 'recover_customer_password' %}
+            {{ form.errors | default_errors }}
+            <div class="form__row">
+              <div class="form__field">
+                <label for="email" >Email Address</label><br>
+                <input type="email" value="" size="30" name="email" id="recover-email" />
+              </div>
+            </div>
+            <div class="form__actions">
+              <input class="btn" type="submit" value="Submit" />
+              <span class="form__note">or <a id="forgot-password-cancel" href="#" title="Cancel">Cancel</a></span>
+            </div>
+          {% endform %}
+        </div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+
+              $('#forgot-password').on('click', function(e){
+                $('#recover-password-form').show();
+                $('#customer-login-form').hide();
+              });
+
+              $('#forgot-password-cancel').on('click', function(){
+                $('#recover-password-form').hide();
+                $('#customer-login-form').show();
+              });
+
+              $.extend({
+                getUrlVars: function(){
+                  var vars = [], hash;
+                  var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                  for(var i = 0; i < hashes.length; i++)
+                  {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                  }
+                  return vars;
+                },
+                getUrlVar: function(name){
+                  return $.getUrlVars()[name];
+                }
+              });
+
+              if (window.location.hash == '#recover') {
+                $('#forgot-password').trigger('click');
+              }
+
+              if (window.location.href.indexOf("next") > -1) {
+                var redirect = $.getUrlVar('next');
+                if (window.location.href.indexOf("view") > -1) {
+                  var view = $.getUrlVar('view');
+                  $('#redirect-url').val(redirect+"?view="+view);
+                }
+                else if (window.location.hash == '#recover') {
+                  $('#forgot-password').trigger('click');
+                }
+                else {
+                  $('#redirect-url').val(redirect);
+                }
+              }
+          });
+        </script>
+      </div>
+    </div>
+  </div>
+</main>

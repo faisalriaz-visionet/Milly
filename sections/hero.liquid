@@ -1,0 +1,298 @@
+{% assign is_slider = false %}
+{% if section.blocks.size > 1 %}{% assign is_slider = true %}{% endif %}
+
+<section class="section section--hero hero hero--{{ section.id }} {{ section.settings.padding_top }} {{ section.settings.padding_bottom }}" {{ section.shopify_attributes }} data-is-slider="{{ is_slider }}">
+  <style>.hero--{{ section.id }} {background-color: {{ section.settings.bg_color }};}</style>
+  <div class="swiper-container">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="swiper-slide hero__slide hero__slide--{{ block.id }}"{{ block.shopify_attributes }}>
+          <style>
+            .hero__slide--{{ block.id }} .hero__text h2,
+            .hero__slide--{{ block.id }} .hero__text span,
+            .hero__slide--{{ block.id }} .hero__text p {color: {{ block.settings.text_color }}; }
+
+            {% comment %} Only edit button text color if we are text-only button {% endcomment %}
+            {% if block.settings.btn_style == 'btn--text-only' %}
+              .hero__slide--{{ block.id }} .hero__text .btn {color: {{ block.settings.text_color }}; }
+              .hero__slide--{{ block.id }} .hero__text .btn:hover,
+              .hero__slide--{{ block.id }} .hero__text .btn:focus {color: {{ block.settings.button_text_hover_color }};}
+            {% endif %}
+
+            {% assign bg_opacity = block.settings.bg_overlay_opacity | times: 0.01 %}
+            .hero__slide--{{ block.id }} .hero__image:after { background: linear-gradient(180deg, transparent 75%, {{ block.settings.bg_overlay_color | color_modify: 'alpha', bg_opacity }});}
+
+            @media screen and (max-width: 30em) {
+              .hero__slide--{{ block.id }} .hero__image {
+                background-image: url('{{ block.settings.mobile_image | img_url: "600x" }}') !important;
+                 padding-top: calc(100vh - 250px);
+               }
+              .hero__slide--{{ block.id }} .hero__text h2,
+              .hero__slide--{{ block.id }} .hero__text span,
+              .hero__slide--{{ block.id }} .hero__text p {color: {{ block.settings.mobile_text_color }}; }
+
+              {% comment %} Only edit button text color if we are text-only button {% endcomment %}
+              {% if block.settings.btn_style == 'btn--text-only' %}
+                .hero__slide--{{ block.id }} .hero__text .btn {color: {{ block.settings.mobile_text_color }}; }
+                .hero__slide--{{ block.id }} .hero__text .btn:hover,
+                .hero__slide--{{ block.id }} .hero__text .btn:focus {color: {{ block.settings.button_text_hover_color }};}
+              {% endif %}
+            }
+          </style>
+
+          <figure class="hero__image lazy" data-bg="{{ block.settings.image | img_url: '3000x' }}">
+            <a href="{{ block.settings.url }}">
+              <figcaption class="hero__text hero__text--{{ block.settings.text_alignment }}">
+                {% if block.settings.button_text != blank or block.settings.title != blank %}
+                  {% if block.settings.preheading %}
+                    <span class="h2 fw1 ls3"><em>{{ block.settings.preheading }}</em></span>
+                  {% endif %}
+
+                  <h2 class="h2 h1-l fw1 ls3 tu">{{ block.settings.title }}</h2>
+
+                  {% if block.settings.description %}
+                    <p class="p-md">{{ block.settings.description }}</p>
+                  {% endif %}
+
+                  {% if block.settings.button_text != blank %}
+                    <span class="btn {{ block.settings.btn_style }} {{ block.settings.btn_size }}" href="{{ block.settings.url }}">{{ block.settings.button_text }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="visually-hidden">{{ block.settings.image.alt | default: shop.name }}</span>
+                {% endif %}
+              </figcaption>
+            </a>
+          </figure>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% if is_slider %}<div class="swiper-pagination swiper-pagination--{{ section.id }}"></div>{% endif %}
+
+  <script>
+    {% assign slide_timer_length = 0 %}
+    {% if section.settings.slide_timer != blank  %}
+      {% assign slide_timer_length = section.settings.slide_timer | plus: slide_timer_length | times: 1000 %}
+    {% endif %}
+
+    document.addEventListener('DOMContentLoaded', function() {
+      window.rehashSwipers = window.rehashSwipers || {};
+
+      function initSwiper() {
+        window.rehashSwipers['{{ section.id }}'] = new Swiper('.hero--{{ section.id }} .swiper-container', {
+          loop: true,
+          {% if slide_timer_length > 0 %}
+            autoplay: {
+              delay: {{ slide_timer_length }}
+            },
+          {% endif %}
+          pagination: {
+            el: '.swiper-pagination--{{ section.id }}',
+            type: 'bullets',
+            renderBullet: function (index, className) {
+              return `<span class="${className}" role="presentation"></span>`;
+            }
+          },
+        });
+      }
+
+      {% if is_slider %}
+        initSwiper();
+      {% endif %}
+
+      $(document).on('shopify:section:load', function(e) {
+        window.rehashSwipers['{{ section.id }}'] && window.rehashSwipers['{{ section.id }}'].destroy();
+        if ( $(`.hero--${e.detail.sectionId}`).data('is-slider') ) {
+          initSwiper();
+        }
+      });
+
+      $(document).on('shopify:block:select', function(e) {
+        var index = $('.hero__slide--' + e.detail.blockId ).data('swiper-slide-index');
+        window.rehashSwipers['{{ section.id }}'] && window.rehashSwipers['{{ section.id }}'].slideToLoop(index);
+      });
+    });
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Design Settings"
+    },
+    {
+      "type":"select",
+      "id":"padding_top",
+      "label":"Container Padding Top",
+      "options":[
+        {"label":"None", "value":"padding-top--tight"},
+        {"label":"Tight", "value":"padded-top--tight"},
+        {"label":"Default", "value":"padded-top--default"},
+        {"label":"Large", "value":"padded-top--large"}
+      ],
+      "default":"padded-top--default"
+    },
+    {
+      "type":"select",
+      "id":"padding_bottom",
+      "label":"Container Padding Bottom",
+      "options":[
+        {"label":"None", "value":"padded-bottom--none"},
+        {"label":"Tight", "value":"padded-bottom--tight"},
+        {"label":"Default", "value":"padded-bottom--default"},
+        {"label":"Large", "value":"padded-bottom--large"}
+      ],
+      "default":"padded-bottom--default"
+    },
+    {
+      "type":"color",
+      "id":"bg_color",
+      "label":"Background Color",
+      "default":"#efefef"
+    },
+    {
+      "type":"text",
+      "id":"slide_timer",
+      "label":"Slide Timer",
+      "default":"8",
+      "info":"Length in seconds to display each slide"
+    }
+  ],
+  "blocks":[
+    {
+      "type":"hero_slide",
+      "name":"Hero Slide",
+      "settings":[
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type":"image_picker",
+          "id":"image",
+          "label":"Image",
+          "info":"Image should be JPG format, at least 3000px wide."
+        },
+        {
+          "type":"image_picker",
+          "id":"mobile_image",
+          "label":"Mobile Image",
+          "info":"Image should be JPG format, 1250x1560"
+        },
+        {
+          "type":"color",
+          "id":"bg_overlay_color",
+          "label":"Image Overlay Color",
+          "default":"#222"
+        },
+        {
+          "type":"range",
+          "id":"bg_overlay_opacity",
+          "label":"Image Overlay Opacity",
+          "min":0,
+          "max":100,
+          "unit":"%",
+          "step":10,
+          "default":0
+        },
+        {
+          "type": "header",
+          "content": "Text Content"
+        },
+        {
+          "type":"select",
+          "id":"text_alignment",
+          "label":"Text Alignment",
+          "options":[
+            {"label":"Top Left", "value":"top-left"},
+            {"label":"Center Left", "value":"center-left"},
+            {"label":"Bottom Left", "value":"bottom-left"},
+            {"label":"Top Center", "value":"top-center"},
+            {"label":"Center Center", "value":"center-center"},
+            {"label":"Bottom Center", "value":"bottom-center"},
+            {"label":"Top Right", "value":"top-right"},
+            {"label":"Center Right", "value":"center-right"},
+            {"label":"Bottom Right", "value":"bottom-right"}
+          ],
+          "default":"center-left"
+        },
+        {
+          "type":"text",
+          "id":"preheading",
+          "label":"Pre-Heading"
+        },
+        {
+          "type":"text",
+          "id":"title",
+          "label":"Heading"
+        },
+        {
+          "type":"text",
+          "id":"description",
+          "label":"Description"
+        },
+        {
+          "type":"color",
+          "id":"text_color",
+          "label":"Desktop Text Color",
+          "default":"#fff"
+        },
+        {
+          "type":"color",
+          "id":"mobile_text_color",
+          "label":"Mobile Text Color",
+          "default":"#fff"
+        },
+        {
+          "type":"color",
+          "id":"button_text_hover_color",
+          "label":"Button Text Hover Color",
+          "default":"#000"
+        },
+        {
+          "type":"text",
+          "id":"button_text",
+          "label":"Button Text",
+          "info":"Leave blank to hide"
+        },
+        {
+          "type":"url",
+          "id":"url",
+          "label":"Link URL"
+        },
+        {
+          "type":"select",
+          "id":"btn_style",
+          "label":"Button Style",
+          "options":[
+            {"label":"Primary", "value":""},
+            {"label":"Secondary", "value":"btn--secondary"},
+            {"label":"Tertiary", "value":"btn--tertiary"},
+            {"label":"Text Only", "value":"btn--text-only"}
+          ],
+          "default":"btn--text-only"
+        },
+        {
+          "type":"select",
+          "id":"btn_size",
+          "label":"Button Size",
+          "options":[
+            {"label":"Small", "value":"btn--small"},
+            {"label":"Default", "value":""},
+            {"label":"Large", "value":"btn--large"}
+          ],
+          "default":"btn--large"
+        }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "Hero",
+    "category": "Content"
+  }]
+}
+{% endschema %}
+

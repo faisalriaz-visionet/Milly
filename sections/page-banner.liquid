@@ -1,0 +1,96 @@
+{% assign found_page = false %}
+{% for block in section.blocks %}
+  {% if page.handle == block.settings.page or template.name == block.settings.template %}
+    {% assign found_page = true %}
+    <style>
+      {% assign color_alpha = block.settings.overlay_opacity | times: 0.01 %}
+      .page-banner--{{ block.id }}:after { background-color: {{ block.settings.overlay_color | color_modify: 'alpha', color_alpha }};}
+      .page-banner--{{ block.id }} h1 {text-align:center;color: {{ block.settings.text_color }};}
+      {% if block.settings.container == true %}
+      .page-banner--{{ block.id }} {width: 100%;max-width: 1000px;margin:3em auto 0;}
+      {% endif %}
+    </style>
+    <div class="page-banner page-banner--{{ block.id }} lazy" data-bg="{{ block.settings.image | img_url: '2000x' }}" {{ block.shopify_attributes }}>
+      <div class="container">
+        <h1>{% unless block.settings.title_visible %}<span class="visually-hidden">{% endunless %}{{ block.settings.title }}{% unless block.settings.title_visible%}</span>{% endunless %}</h1>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}
+
+ {% if found_page == false and page.template_suffix != 'sectionized' %}
+  <div class="container">
+    <div class="page-banner page-banner--text-only">
+      <h1 class="h4 h2-l fw1 center tu">{{ page.title }}</h1>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Page Banners",
+  "blocks": [
+    {
+      "type":"banner",
+      "name":"Page Banner",
+      "settings":[
+        {
+          "type":"page",
+          "id":"page",
+          "label":"Page",
+          "info":"Leave blank to use Template Handle"
+        },
+        {
+          "type":"text",
+          "id":"template",
+          "label":"Template Name",
+          "info":"Leave blank to use Page"
+        },
+        {
+          "type":"text",
+          "id":"title",
+          "label":"Title"
+        },
+        {
+          "type":"checkbox",
+          "id":"title_visible",
+          "label":"Title Visible?",
+          "default": true
+        },
+        {
+          "type":"image_picker",
+          "id":"image",
+          "label":"Image"
+        },
+        {
+          "type":"checkbox",
+          "id":"container",
+          "label":"Contain Banner?",
+          "info": "Leave unchecked to make image full-width",
+          "default": true
+        },
+        {
+          "type":"color",
+          "id":"text_color",
+          "label":"Text Color",
+          "default":"#fff"
+        },
+        {
+          "type":"color",
+          "id":"overlay_color",
+          "label":"Overlay Color"
+        },
+        {
+          "type":"range",
+          "id":"overlay_opacity",
+          "label":"Overlay Opacity",
+          "min":0,
+          "max":100,
+          "step":10,
+          "default":20
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,95 @@
+{% if product.metafields.milly.upsells != blank %}
+  {% assign item_upsell_handles = product.metafields.milly.upsells | split: ',' %}
+  {% assign initial_price = 0 %}
+
+  <div class="upsells">
+    <h3 class="upsells-heading subheading h7">Frequently bought together</h3>
+    <ul class="upsells-list">
+      <li class="upsells-list-item upsells-list-item--current upsells-list-item--selected" data-price="{{ current_variant.price }}" data-variant="{{ current_variant.id }}">
+        {% assign initial_price = initial_price | plus: current_variant.price %}
+        {% assign image = current_variant.featured_image | default: product.featured_image %}
+        <div class="upsells-list-item__image">
+          <img src="{{ image | img_url: '300x' }}">
+          <div class="upsells-list-item__selection"></div>
+        </div>
+        <div class="upsells-list-item__title">
+          <b>This item &mdash;</b> {{ product.title }}
+          <span class="upsells-list-item__price">{{ current_variant.price | money }}</span>
+        </div>
+      </li>
+
+      {% for upsell_handle in item_upsell_handles limit: 2 %}
+        {% assign upsell_product = all_products[upsell_handle] %}
+
+        {% assign upsell_variant = upsell_product.first_available_variant %}
+        {% if upsell_variant.available %}
+          <li class="upsells-list-item upsells-list-item--selected" data-price="{{ upsell_variant.price }}" data-variant="{{ upsell_variant.id }}">
+            {% assign initial_price = initial_price | plus: upsell_variant.price %}
+            <div class="upsells-list-item__image">
+              <img src="{{ upsell_product.images | first | img_url: '300x' }}">
+              <div class="upsells-list-item__selection"></div>
+            </div>
+            <div class="upsells-list-item__title">
+              <a href="{{ upsell_product.url }}" title="{{ upsell_product.title }}">{{ upsell_product.title }}</a>
+              <span class="upsells-list-item__price">{{ upsell_variant.price | money }}</span>
+            </div>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+    <div class="upsells-action">
+      <button class="btn btn--block btn--small btn--tertiary">Add <span class="upsell-count-prefix">all</span> <span class="upsell-count">3</span> to cart for <span class="upsell-total-price">{{ initial_price | money }}</span></button>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        function updateUpsellUI() {
+          var els = $('.upsells-list-item.upsells-list-item--selected'),
+            price = 0;
+
+          // update atc button text
+          $('.upsell-count').text(els.length).toggle(els.length > 1);
+          $('.upsell-count-prefix').toggle(els.length > 1);
+
+          // update total price
+          els.each(function(i, el) {
+            price = price + parseInt($(el).data('price'));
+          });
+          $('.upsell-total-price').text(Shopify.formatMoney(price));
+
+          // update atc button status
+          $('.upsells-action button').toggleClass('disabled', els.length <= 0 );
+        }
+
+        function handleClickUpsell(e) {
+          e.preventDefault();
+          $(this).parents('.upsells-list-item').toggleClass('upsells-list-item--selected');
+          updateUpsellUI();
+        }
+
+        function handleClickUpsellAdd(e) {
+          var els = $('.upsells-list-item.upsells-list-item--selected'),
+            items = [];
+
+          els.each(function(i,el) {
+            var data = $(el).data();
+
+            items.push({
+              id: data.variant,
+              quantity: 1
+            });
+          });
+
+          console.log(items);
+          if ( items.length > 0 ) {
+            CartJS.addItems(items);
+          }
+        }
+
+        $(document).on('click', '.upsells-list-item__image', handleClickUpsell);
+        $(document).on('click', '.upsells-action button', handleClickUpsellAdd);
+        window.updateUpsellUI = updateUpsellUI;
+      });
+    </script>
+  </div>
+{% endif %}

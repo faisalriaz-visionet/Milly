@@ -1,0 +1,9 @@
+<div class="product-list__item column column--xs-12">
+  <figure class="product-list__item-image lazy" data-bg="{{ prod.featured_image | img_url: '72x' }}">
+    <figcaption class="visually-hidden">{% include 'product-title', prod: prod %}</figcaption>
+  </figure>
+  <a href="{{ prod.url }}" class="product-list__item-info">
+    <p>{% include 'product-title', prod: prod %}</p>
+    <span>{{ prod.price | money }}</span>
+  </a>
+</div>

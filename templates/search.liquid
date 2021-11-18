@@ -1,0 +1,24 @@
+<main class="content content--no-sidebar" role="main">
+  <div class="container">
+    <div class="page-main">
+      <div class="page-header">
+        <h1 class="h5 center">{{ search.results_count }} result{% if search.results_count > 1 or search.results_count == 0 %}s{% endif %} for "{{search.terms}}"</h1>
+      </div>
+      <div class="page-content" id="search-results">
+        {% if search.performed %}
+          {%- paginate search.results by 12 -%}
+            <div class="item-list item-list--with-thumbnail item-list--search-results row row--gutters">
+            {% for prod in search.results %}
+              {% include 'product-loop' classes: 'column--xs-6 column--md-4' %}
+            {% endfor %}
+            </div>
+
+            {% if paginate.pages > 1 %}
+              {% include 'pagination' %}
+            {% endif %}
+          {%- endpaginate -%}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>

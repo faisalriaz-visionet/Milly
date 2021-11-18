@@ -1,0 +1,30 @@
+{% for block in section.blocks %}
+  {% case block.type %}
+    {% when 'hero' %}
+      {% include 'block-hero' %}
+    {% when 'hero_3up' %}
+      {% include 'block-hero-3up'%}
+    {% when 'product_listing' %}
+      {% include 'block-product-listing'%}
+    {% when 'product_feature_2up' %}
+      {% include 'block-product-feature-2up'%}
+    {% when 'text_and_image' %}
+      {% include 'block-text-and-image'%}
+    {% when 'text' %}
+      {% include 'block-text' %}
+    {% when 'video' %}
+      {% include 'block-video' %}
+    {% when 'html' %}
+      {% include 'block-html' %}
+    {% when 'cta_grid' %}
+      {% include 'block-cta-grid' %}
+    {% when 'cta_and_products' %}
+      {% include 'block-cta-and-products' %}
+    {% when 'blog_feature' %}
+      {% include 'block-blog-feature' %}
+    {% when '50_50' %}
+      {% include 'block-50-50' %}
+    {% when '3up' %}
+      {% include 'block-3up' %}
+  {% endcase %}
+{% endfor %}

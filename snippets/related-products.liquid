@@ -1,0 +1,44 @@
+{% if product.metafields.milly.related_products %}
+  {% assign related_product_handles = product.metafields.milly.related_products | split: ',' %}
+{% endif %}
+
+<section class="section section--related-products">
+  <div class="section__header container--wide">
+    <h2 class="section--related-products-title h5 h3-m">Other People Considered</h2>
+  </div>
+  <div class="section__content">
+    <div class="products{% if template == 'cart' %} products--grey{% endif %}"></div>
+    <script type="text/template" id="related-product__template">
+      <article itemtype="http://schema.org/Product" itemscope="itemscope" class="product product--<%= product.id %>">
+        <div class="product__content">
+          <a itemprop="url" href="/products/<%= product.handle %>" title="<%= product.title %>">
+            <div class="product__image-wrapper">
+              <img itemprop="image" class="product__image product__image--<%= product.id %>" src="<%= Shopify.resizeImage(product.featured_image, '600x') %>" data-default-image="<%= product.featured_image %>" alt="<%= product.title %>">
+            </div>
+            <header class="product__header">
+              <div class="product__vendor"><%= product.vendor %></div>
+              <h2 class="product__title" itemprop="name"><%= product.title %></h2>
+              <span class="product__meta product__meta--pricing" itemprop="offers" itemtype="http://schema.org/Offer" itemscope="itemscope">
+                <meta itemprop="priceCurrency" content="<%= Shopify.currency.active %>">
+                <meta itemprop="price" content="<%= (product.price / 100).toFixed(2) %>">
+                <span class="product__price"><%= Shopify.formatMoney(product.price, Shopify.money_format) %></span>
+              </span>
+            </header>
+          </a>
+        </div>
+      </article>
+    </script>
+
+    <script type="text/javascript" id="related_product__json">
+      {%- if related_product_handles != blank -%}
+        window.rehash_related_products = [
+          {%- for related_product in related_product_handles limit: 5 -%}
+            {{ all_products[related_product] | json }}{%- unless forloop.index == 0 -%},{%- endunless -%}
+          {%- endfor -%}
+        ];
+      {%- else -%}
+        var rehash_related_products = [];
+      {%- endif -%}
+    </script>
+  </div>
+</section>

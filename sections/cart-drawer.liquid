@@ -1,0 +1,115 @@
+<div class="cart-drawer">
+  <div class="cart-drawer__header">
+    <h3 class="cart-drawer__title h4 tu">{{ section.settings.title }}</h3>
+    <button class="cart-drawer__close cart-drawer-toggle btn btn--text-only">
+      <span class="visually-hidden">Close Cart</span>
+      {% include 'icon', handle: 'close' %}
+    </button>
+  </div>
+
+  <div class="cart-drawer__body">
+    
+      <div id="cart-drawer" class="cart-drawer__items">
+        {% for item in cart.items %}
+          <div class="cart-drawer__item">
+            <div class="cart-drawer__item-image">
+              <a href="{{ item.product.url }}?variant={{ item.variant.id }}">
+                <img class="lazy" data-src="{{ item.image | img_url: '240x' }}" alt="{{ item.variant.title }}" />
+              </a>
+            </div>
+            <div class="cart-drawer__item-info">
+              <h2 class="cart-drawer__item-title h7"><a href="{{ item.product.url }}?variant={{ item.variant.id }}">{{ item.product.title }}</a></h2>
+              <div class="cart-drawer__item-price">
+                {% if item.original_price > item.final_price %}<div class="cart-drawer__item-price--original">{{ item.original_price | money }}</div>{% endif %}
+                <div class="cart-drawer__item-price--final">{{ item.final_price | money }}</div>
+              </div>
+
+              {% for p in item.properties %}
+                {% if p.first contains 'persistent_note' or p.first contains 'isFinalSale' or p.first contains 'delivery' %}
+                  <div class="tu ls2 fw2 cart-drawer__item-final-sale">{{ p.last }}</div>
+                {% endif %}
+              {% endfor %}
+
+              {% if item.total_discount > 0 %}
+                <div class="cart-drawer__item-meta cart-drawer__item-meta--discount">
+                  <small>{{ item.message }} / {{ item.total_discount | money }} OFF</small>
+                </div>
+              {% endif %}
+
+              {% for option in item.options_with_values %}
+                <div class="cart-drawer__item-meta tu">
+                  <strong>{{ option.name }}:</strong> {{ option.value }}
+                </div>
+              {% endfor %}
+
+              <div class="cart-drawer__item-actions">
+                <div class="cart-drawer__item-qty">
+                  <a href="#" class="cart-drawer__item-qty-minus" data-index="{{ forloop.index }}" data-action="decrement" data-qty="{{ item.quantity | minus: 1 }}">
+                    <span class="visually-hidden">Reduce Quantity by 1</span>
+                    {% include 'icon', handle: 'minus' %}
+                  </a>
+                  <span class="cart-drawer__item-qty-label" id="{{ item.id }}">{{ item.quantity }}</span>
+                  <a href="#" class="cart-drawer__item-qty-plus" data-index="{{ forloop.index }}" data-action="increment" data-qty="{{ item.quantity | plus: 1 }}">
+                    <span class="visually-hidden">Increase Quantity by 1</span>
+                    {% include 'icon', handle: 'plus' %}
+                  </a>
+                </div>
+                <button id='remove-item' data-remove-id='{{ item.id }}' class="btn btn--text-only btn--small ls2" data-cart-remove="{{ forloop.index }}">Remove</button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+   <p class="cart-drawer__no-items">You have no items in your bag.</p>
+  </div>
+  
+    <div class="cart-drawer__totals">
+      <div class="cart-drawer__total tu"><span><strong>Subtotal</strong></span>: <span id="total-cart">{{ cart.total_price | money }}</span></div>
+      <afterpay-placement data-locale="en_US" data-currency="USD" data-amount-selector=".cart-drawer__total" data-badge-theme="black-on-white" data-size="xs" ></afterpay-placement>
+
+      {% if section.settings.message != blank %}
+        {{ section.settings.message }}
+      {% endif %}
+    </div>
+
+    <div class="cart-drawer__actions">
+      <a href="/checkout" id="checkout" class="btn btn--block btn--large btn--secondary">Checkout</a>
+      {% comment %} Removed by request of client on 04-01-2021 {% endcomment %}
+      {% comment %}
+      {% if additional_checkout_buttons %}
+        <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+          {{ content_for_additional_checkout_buttons }}
+        </div>
+      {% endif %}
+      {% endcomment %}
+    </div>
+ 
+</div>
+<div class="cart-drawer-bg"></div>
+
+{% schema %}
+{
+  "name": "Cart Drawer",
+  "settings": [
+    {
+      "type":"text",
+      "id":"title",
+      "label":"Heading",
+      "default":"Cart"
+    },
+    {
+      "type":"text",
+      "id":"no_items_message",
+      "label":"No Items Message",
+      "default":"You have no items in your bag."
+    },
+    {
+      "type":"text",
+      "id":"message",
+      "label":"Message",
+      "default":"<p>Shipping, taxes, and discounts will be calculated at checkout.</p>"
+    }
+  ]
+}
+{% endschema %}
+

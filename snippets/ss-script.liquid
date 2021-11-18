@@ -1,0 +1,28 @@
+{%- if customer -%}
+{% capture ss_id_attr %} shopper.id="{{ customer.id }}"{% endcapture %}
+{%- endif -%}
+
+{%- if collection.handle and collection.handle != 'shop' -%}
+{% capture ss_collection_attr %} collection="{{ collection.id }}" collection-name="{{ collection.title }}" collection-handle="{{ collection.handle }}"{% endcapture %}
+{%- endif -%}
+
+{%- if current_tags -%}
+{% capture ss_tags_attr %} tags="{{ current_tags | join - '|' }}"{% endcapture %}
+{%- endif -%}
+
+{%- if template -%}
+{% capture ss_template_attr %} template="{{ template }}"{% endcapture %}
+{%- endif -%}
+
+{%- if collection.handle -%}
+{% capture ss_hide_attr %} hide-content="#searchspring-sidebar, #searchspring-content"{% endcapture %}
+{%- else -%}
+{% assign ss_defer_attr = ' defer' %}
+{%- endif -%}
+
+{%- if collection.metafields.global.color_family -%}
+{% capture ss_color_attr %} color="{{ collection.metafields.global.color_family }}"{% endcapture %}
+{%- endif -%}
+
+{% comment %}Searchspring Script{% endcomment %}
+<script src="//cdn.searchspring.net/search/v3/lts/searchspring.catalog.js?zeby6b"{{ ss_id_attr }}{{ ss_collection_attr }}{{ ss_tags_attr }}{{ ss_template_attr }}{{ ss_hide_attr }}{{ ss_defer_attr }}{{ ss_color_attr }}></script>

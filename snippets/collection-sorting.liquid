@@ -1,0 +1,23 @@
+<div class="dropdown">
+  <div class="dropdown__label" tabindex="0" role="button">
+    <span>Sort</span>{% include 'icon' handle: 'caret-down' %}
+  </div>
+  <div class="dropdown__options">
+    <div class="dropdown__option" data-label="New Arrivals" data-value="new-arrivals">
+      <span class="dropdown__option-icon">{% include 'icon', handle: 'new-arrivals' %}</span>
+      <span class="dropdown__option-label">New Arrivals</span>
+    </div>
+    <div class="dropdown__option" data-label="Popularity" data-value="popularity">
+      <span class="dropdown__option-icon">{% include 'icon', handle: 'star' %}</span>
+      <span class="dropdown__option-label">Popularity</span>
+    </div>
+    <div class="dropdown__option" data-label="Low to High" data-value="price-asc">
+      <span class="dropdown__option-icon">{% include 'icon', handle: 'price-filter' %}</span>
+      <span class="dropdown__option-label">Low to High</span>
+    </div>
+    <div class="dropdown__option" data-label="High to Low" data-value="price-desc">
+      <span class="dropdown__option-icon">{% include 'icon', handle: 'price-filter' %}</span>
+      <span class="dropdown__option-label">High to Low</span>
+    </div>
+  </div>
+</div>

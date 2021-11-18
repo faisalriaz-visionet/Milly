@@ -1,0 +1,137 @@
+<footer class="site-footer" {{ section.shopify_attributes }}>
+  {% if template contains 'index' %}
+    <div class="site-footer-contact">
+      <div class="container--wide">
+        <div class="site-footer-contact__items">
+          {% if settings.phone_number != blank %}
+            <a href="tel:{{ settings.phone_number }}" class="site-footer-contact__item">
+              {% include 'icon', handle: 'phone' %}
+              <span>{{ settings.phone_number }}</span>
+            </a>
+          {% endif %}
+
+          {% if settings.email_address != blank %}
+            <a href="mailto:{{ settings.email_address }}" class="site-footer-contact__item">
+              {% include 'icon', handle: 'envelope' %}
+              <span>{{ settings.email_address }}</span>
+            </a>
+          {% endif %}
+         
+          {% if settings.live_chat_url != blank %}
+            <button type="button" onclick="GorgiasChat.open();return false;" class="site-footer-contact__item">
+              {% include 'icon', handle: 'chat' %}
+              <span>live chat</span>
+            </button>
+          {% endif %}
+          
+
+          <button class="back-to-top tu">{% include 'icon', handle: 'chevron-down' %} Back to Top</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="site-footer-upper">
+    <div class="container--wide">
+      <div class="site-footer__meta">
+        <div class="site-footer__newsletter">
+          {% comment %} <form class="site-footer__newsletter-form">
+            <label for="site-footer-newsletter" class="visually-hidden">Email Address</label>
+            <input type="email" placeholder="Email Address" id="site-footer-newsletter" />
+            <button type="submit" class="btn btn--text-only"><span class="visually-hidden">Submit</span>{% include 'icon' handle: 'arrow-right' %}</button>
+          </form> {% endcomment %}
+          <div class="klaviyo-form-WCT9kY"></div>
+          <p class="p-sm">{{ section.settings.newsletter_text }}</p>
+        </div>
+
+        <div class="site-footer__social">
+          {% if settings.social_facebook != blank  or settings.social_twitter != blank or settings.social_instagram != blank or settings.social_pinterest != blank or settings.social_youtube != blank %}
+            <ul>
+              {% if settings.social_instagram != blank %}
+                <li><a href="https://instagram.com/{{ settings.social_instagram }}"><span class="visually-hidden">Visit us on Instagram</span>{% include 'icon', handle: 'instagram' %}</a></li>
+              {% endif %}
+              {% if settings.social_facebook != blank %}
+                <li><a href="https://facebook.com/{{ settings.social_facebook }}"><span class="visually-hidden">Visit us on Facebook</span>{% include 'icon', handle: 'facebook' %}</a></li>
+              {% endif %}
+              {% if settings.social_twitter != blank %}
+                <li><a href="https://twitter.com/{{ settings.social_twitter }}"><span class="visually-hidden">Visit us on Twitter</span>{% include 'icon', handle: 'twitter' %}</a></li>
+              {% endif %}
+              {% if settings.social_pinterest != blank %}
+                <li><a href="https://pinterest.com/{{ settings.social_pinterest }}"><span class="visually-hidden">Visit us on Pinterest</span>{% include 'icon', handle: 'pinterest' %}</a></li>
+              {% endif %}
+              {% if settings.social_youtube != blank %}
+                <li><a href="https://youtube.com/{{ settings.social_youtube }}"><span class="visually-hidden">Visit us on Youtube</span>{% include 'icon', handle: 'youtube' %}</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <ul class="site-footer__navigation">
+        {% for link in linklists[section.settings.main_linklist].links %}
+          <li>
+            <a class="h7" href="{% if link.url == '#' %}/{% else %}{{ link.url }}{% endif %}">{{ link.title }}</a>
+            {% if link.links.size > 0 %}
+              <ul class="site-footer__navigation--sub">
+                {% for sub_link in link.links %}
+                  <li>
+                    <a href="{% if sub_link.url == '#' %}/{% else %}{{ sub_link.url }}{% endif %}">{{ sub_link.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+        <li class="survey-text">
+          <a class="h7" href="/">{{ 'survey_monkey.title' | t }}</a>
+          <p class="p-sm">{{ 'survey_monkey.survey_text' | t }}</p>
+          {{ 'survey_monkey.begin_survey_html' | t }}
+
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="site-footer-lower">
+    <div class="container--wide">
+      <div class="site-footer__copyright">
+        <p class="p-sm">&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All Rights Reserved.</p>
+      </div>
+      <ul class="site-footer__utility-links">
+        {% for link in linklists[section.settings.lower_linklist].links %}
+          <li><a class="p-sm" href="{% if link.url == '#' %}/{% else %}{{ link.url }}{% endif %}">{{ link.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type":"header",
+      "content":"Newsletter"
+    },
+    {
+      "type": "textarea",
+      "id": "newsletter_text",
+      "label": "Text"
+    },
+    {
+      "type":"header",
+      "content":"Navigation"
+    },
+    {
+      "type":"link_list",
+      "id":"main_linklist",
+      "label":"Main Menu"
+    },
+    {
+      "type":"link_list",
+      "id":"lower_linklist",
+      "label":"Lower Menu"
+    }
+  ]
+}
+{% endschema %}

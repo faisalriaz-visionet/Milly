@@ -1,0 +1,129 @@
+<a class="klaviyo-bis-trigger visually-hidden" href="#" role="button">Notify Me When Available</a>
+<script src="https://a.klaviyo.com/media/js/onsite/onsite.js"></script>
+<script>
+    var klaviyo = klaviyo || [];
+    klaviyo.init({
+      account: "QByzEH",
+      list: "WYmd9A",
+      platform: "shopify"
+    });
+    klaviyo.enable("backinstock",
+    {
+      trigger: {
+        product_page_text: "Notify Me When Available",
+        product_page_class: "btn",
+        product_page_text_align: "center",
+        product_page_margin: "0px",
+        replace_anchor: false
+      },
+      modal: {
+        headline: "{product_name}",
+        body_content: "Register to receive a notification when this item comes back in stock.",
+        email_field_label: "Email",
+        button_label: "Notify me when available",
+        subscription_success_label: "You're in! We'll let you know when it's back.",
+        footer_content: '',
+        additional_styles: `
+          @font-face {
+            font-family: "Neutra Text";
+            src: url(//cdn.shopify.com/s/files/1/0026/2304/5676/t/81/assets/NeutraText-Book.woff2?v=12150209599473951120) format("woff2"),
+                  url(//cdn.shopify.com/s/files/1/0026/2304/5676/t/81/assets/NeutraText-Book.woff?v=8812220643627037640) format("woff");
+            font-weight: 400;
+            font-style: normal;
+          }
+
+          @font-face {
+            font-family: "Neutra Text";
+            src: url(//cdn.shopify.com/s/files/1/0026/2304/5676/t/81/assets/NeutraText-Bold.woff2?v=10808744278884831019) format("woff2"),
+                  url(//cdn.shopify.com/s/files/1/0026/2304/5676/t/81/assets/NeutraText-Bold.woff?v=4535736150244065143) format("woff");
+            font-weight: 700; /* Bold */
+            font-style: normal;
+          }
+
+          #klaviyo-bis-modal #container {
+            margin-top: 100px;
+          }
+
+          #klaviyo-bis-modal #variant_select,
+          #klaviyo-bis-modal .modal-title {
+            display:none;
+          }
+
+          #klaviyo-bis-modal .modal-title + p {
+            text-align: center;
+            max-width: 17rem;
+            margin: 0 auto;
+          }
+
+          #klaviyo-bis-modal button.klaviyo-bis-close {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            font-size: 0;
+            float:right;
+          }
+
+          #klaviyo-bis-modal button.klaviyo-bis-close:before,
+          #klaviyo-bis-modal button.klaviyo-bis-close:after{
+            content:'';
+            position:absolute;
+            width:20px;
+            height:1px;
+            background-color: #000;
+            border-radius:2px;
+            top:0px;
+          }
+
+          #klaviyo-bis-modal button.klaviyo-bis-close:before{
+            transform:rotate(45deg);
+            left:2px;
+          }
+
+          #klaviyo-bis-modal button.klaviyo-bis-close:after{
+            transform:rotate(-45deg);
+            right:2px;
+          }
+
+          #klaviyo-bis-modal .btn {
+            background: #fff;
+            color: #000;
+            cursor: pointer;
+            display: inline-block;
+            height: 48px;
+            line-height: 48px;
+            width: auto;
+            padding: 0 24px;
+            font-family: 'Neutra Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            font-style: normal;
+            text-transform: uppercase;
+            text-align: center;
+            border: 1px solid #000;
+            border-radius: 3px;
+            transition: color 0.3s ease, background 0.3s ease, border 0.3s ease;
+            text-decoration: none;
+            appearance: none;
+            width: 100%;
+          }
+
+          body.klaviyo-bis-close {
+            background: rgba(255,255,255,.6) !important;
+          }
+        `,
+        drop_background_color: "#ffffff",
+        background_color: "#fff",
+        text_color: "#000",
+        button_text_color: "#fff",
+        button_background_color: "#000",
+        close_button_color: "#000",
+        error_background_color: "#FC2244",
+        error_text_color: "#fff",
+        success_background_color: "#d3efcd",
+        success_text_color: "#1B9500",
+        newsletter_subscribe_label: "Add me to your email list.",
+        subscribe_checked: true
+      }
+    }
+  );
+</script>

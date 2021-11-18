@@ -1,0 +1,260 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+
+<div class="container--wide product-breadcrumbs--upper">
+  {% include 'breadcrumbs', location: 'product' %}
+</div>
+<div class="product-container container--wide">
+  <div class="product-container__side product-container__side--left">
+    <div class="product__part product__part--gallery">
+      <div class="gallery swiper-container">
+        <div class="swiper-wrapper{% if product.variants.size == 1 %} visible{% endif %}">
+          {% for media_item in product.media %}
+            {% case media_item.media_type %}
+              {% when 'image' %}
+                <div  data-swiper-slide-index="{{ forloop.index0 }}" data-image-id="{{ media_item.id }}" id="n-{{ forloop.index }}" class="swiper-slide">
+                  <a href="{{ media_item | img_url: '1800x', scale: 2 }}" class="MagicZoom">
+                    <img alt="{% if media_item.alt != blank %}{{ media_item.alt | escape  }}{% else %}{{ product.title }} Image {{ forloop.index }}{% endif %}" src="{{ media_item | img_url: '900x' }}" srcset="{{ media_item | img_url: '900x' }} 1x, {{ media_item | img_url: '1800x' }} 2x">
+                  </a>
+                </div>
+              {% when 'video' %}
+                <figure data-swiper-slide-index="{{ forloop.index0 }}" data-image-id="{{ media_item.id }}" id="n-{{ forloop.index }}" class="swiper-slide swiper-slide--video">
+                  <video playsinline="true" muted loop autoplay>
+                    {% for source in media_item.sources %}<source src="{{ source.url }}" type="{{ source.mime_type }}">{% endfor %}
+                  </video>
+                </figure>
+            {% endcase %}
+          {% endfor %}
+        </div>
+
+        <div class="gallery-button gallery-button__prev">{% include 'icon', handle: 'chevron-left' %}</div>
+        <div class="gallery-button gallery-button__next">{% include 'icon', handle: 'chevron-right' %}</div>
+      </div>
+    </div>
+    <div class="product-breadcrumbs--lower">
+      {% include 'breadcrumbs', location: 'product' %}
+    </div>
+  </div>
+
+  <div class="product-container__side product-container__side--right">
+    <div class="product__part product__part--form">
+      <header class="product-header">
+        <h1 class="product-header__title h4 fw1">{{ product.title }}</h1>
+        <div class="swym-wishlist-button-bar product__wishlist"></div>
+        <div class="product-header__meta">
+          <span class="product-header__pricing">
+            <span class="product-price product-price--old" aria-label="Deleted text - old price">{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money }}{% endif %}</span>
+            <span class="product-price product-price--current {% if current_variant.compare_at_price > current_variant.price %} product-price--on-sale{% endif %}">{{ current_variant.price | money }}</span>
+          </span>
+          <afterpay-placement data-locale="en_US" data-currency="USD" data-amount-selector=".product-price--current" data-badge-theme="black-on-white" data-size="sm" ></afterpay-placement>
+        </div>
+      </header>
+
+      {% include 'add-to-cart-form' %}
+    </div>
+
+    <div class="product__part product__part--details">
+      <div class="toggles">
+        {% if product.content != blank %}
+          <div class="toggle visible">
+            <div class="toggle__label tu h7 ls2" role="button" tabindex="0">Description {% include 'icon', handle: 'plus' %}</div>
+            <div class="toggle__content description">{{ product.content }}</div>
+          </div>
+        {% endif %}
+        {% if product.metafields.milly.product_details != blank %}
+          <div class="toggle">
+            <div class="toggle__label tu h7  ls2" role="button" tabindex="0">Product Details {% include 'icon', handle: 'plus' %}</div>
+            <div class="toggle__content">
+              {{ product.metafields.milly.product_details }}
+              {% for tag in product.tags %}
+                {% if tag contains 'style-number:' %}
+                  <p>Style Number: {{ tag | split: ':' | last }}</p>
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+              {%- for tag in product.tags -%}
+              {%- if tag contains "care:" -%}
+              <h4 class="toggle__content-header">Care Information</h4>
+              {%- endif -%}
+              {%- endfor -%}
+              <p class="toggle__content-description-text">
+              {%- if product.tags contains "care:dry-clean" -%}
+              Dry Clean Only<br />
+              {%- endif -%}
+              {%- if product.tags contains "care:hand-wash" -%}
+              Hand Wash Cold, Lay Flat to Dry<br />
+              {%- endif -%}
+              {%- if product.tags contains "care:store-bag" -%}
+              Store your bag in a cool, dry place out of direct sunlight in the protective dust bag provided. Never immerse in water as it could damage the fabric.<br />
+              {%- endif -%}
+              </p>
+            </div>
+          </div>
+        {% endif %}
+        <div class="toggle toggle--always-shown">
+          <div class="toggle__content">
+            {% comment %}
+            <script src="//foursixty.com/media/scripts/fs.embed.v2.5.js" data-feed-id="millyny" data-theme="showcase_v2_5" data-open-links-in-same-page="true" data-page-size="2"></script>
+            <style>.fs-has-links::after { padding:3px 6px; text-decoration:underline; color:rgba(0,0,0,1); content:"SHOP NOW" } .fs-desktop .fs-entry-container { width:50% !important; padding-top:50% !important } .fs-mobile .fs-entry-container { width:100% !important; padding-top:100% !important } .fs-wrapper div.fs-text-container .fs-entry-title, div.fs-detail-title { font-family:'Neutra Text', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-style:normal; font-weight:normal; font-size:16px } div.fs-text-container .fs-entry-date, div.fs-detail-container .fs-post-info, div.fs-wrapper div.fs-has-links::after, .fs-text-product, .fs-overlink-text { font-family:'Neutra Text', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-style:normal; font-weight:bold; font-size:16px } .fs-wrapper div.fs-text-container * { color:rgba(0,0,0,1) } .fs-wrapper div.fs-text-container { background-color:rgba(231,231,231,0.8); margin:0px } div.fs-entry-date { display:none } div.fs-service-icon { display:none } div.fs-entry-title { display:none } .fs-wrapper div.fs-timeline-entry { margin:10px } </style>
+            {% endcomment %}
+
+            {% comment %} BEGIN Four Sixty Embed {% endcomment %}
+            <div id="foursixty-hideable-container" style="display:none"><h3>Ways to Wear</h3><script src="//foursixty.com/media/scripts/fs.slider.v2.5.js" data-feed-id="millyny" data-theme="slider_v2_5" data-open-links-in-same-page="true" data-connector-filter="38238,38245" data-cell-size="50%" data-has-posts-selector="#foursixty-hideable-container" data-for-url="true"></script></div>
+            <style>.fs-has-links::after { padding:4px 8px;color:rgba(2,2,2,1);content:"SHOP NOW"; } .fs-wrapper { height:auto; } .fs-entry-container { height:0 !important;width:50%!important;padding-top:50%!important; } .fs-wrapper div.fs-text-container .fs-entry-title, div.fs-detail-title { font-family:'Neutra Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;font-style:normal;font-weight:normal;font-size:14px; } div.fs-text-container .fs-entry-date, div.fs-detail-container .fs-post-info, div.fs-wrapper div.fs-has-links::after, .fs-text-product, .fs-overlink-text { font-family:'Neutra Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;font-style:normal;font-weight:bold;font-size:16px; } .fs-wrapper div.fs-text-container * { color:rgba(2,2,2,1); } .fs-wrapper div.fs-text-container { background-color:rgba(252,252,252,0.8);margin:0px; } div.fs-entry-date { display:none; } div.fs-service-icon { display:none; } div.fs-entry-title { display:none; } .fs-wrapper div.fs-timeline-entry { margin:1px; } </style>
+            {% comment %} END Four Sixty Embed {% endcomment %}
+          </div>
+        </div>
+      </div>
+      {% unless product.type == 'Gift Card' %}
+        <button class="btn btn--text-only btn--small size-guide-btn size-guide-btn--lower" data-modal-size-guide="{% if product.tags contains 'division:minis' %}minis{% else %}women{% endif %}">Size Guide</button>
+      {% endunless %}
+    </div>
+  </div>
+</div>
+
+<div class="container--wide w-full">
+  <div class="product-lower similer-recom-look ">
+      <div class="nosto_element" id="complete-look"></div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        $(window).on('load', function() {
+          setTimeout(function(){ 
+            $('#complete-look .product-listing__items').slick({
+                centerMode: false,
+                centerPadding: '10px',
+                slidesToShow: 4,
+                dots: false,
+                arrows: false,
+                responsive: [
+                  {
+                    breakpoint: 768,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '10px',
+                      slidesToShow: 2
+                    }
+                  },
+                  {
+                    breakpoint: 480,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '10px',
+                      slidesToShow: 2
+                    }
+                  }
+                ]
+              });
+          }, 4000);
+        });
+      });
+    </script>
+<!--     <h2 class="h5 h4-s tu ls4">Similar Items</h2> -->
+    <section class="section section--product-listing product-listing product-listing--nosto-pdp-similar" >
+      <div class="section__header product-listing__header container--wide">
+        <h2 class="h5 h4-m tu ls4">Similar Items</h2>
+      </div>
+      <div class="nosto_element product-listing__items" id="nosto-pdp-similar">
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          $(window).on('load', function() {
+            setTimeout(function(){ 
+              $('#nosto-pdp-similar').slick({
+                centerMode: false,
+                centerPadding: '60px',
+                slidesToShow: 4,
+                dots: false,
+                arrows: false,
+                responsive: [
+                  {
+                    breakpoint: 768,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '40px',
+                      slidesToShow: 2
+                    }
+                  },
+                  {
+                    breakpoint: 480,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '40px',
+                      slidesToShow: 2
+                    }
+                  }
+                ]
+              });
+              
+            }, 4000);
+          });
+        });
+      </script>
+    </section>
+
+<!--      <h2 class="h5 h4-s tu ls4">Recommended for you</h2> -->
+    
+      <section class="section section--product-listing product-listing product-listing--nosto-pdp-similar" >
+      <div class="section__header product-listing__header container--wide">
+        <h2 class="h5 h4-m tu ls4">Recommended For You</h2>
+      </div>
+      <div class="nosto_element product-listing__items" id="nosto-pdp-recommended">
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          $(window).on('load', function() {
+            setTimeout(function(){ 
+              
+              $('#nosto-pdp-recommended').slick({
+                 centerMode: false,
+                centerPadding: '60px',
+                slidesToShow: 4,
+                dots: false,
+                arrows: false,
+                responsive: [
+                  {
+                    breakpoint: 768,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '40px',
+                      slidesToShow: 2
+                    }
+                  },
+                  {
+                    breakpoint: 480,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '40px',
+                      slidesToShow: 2
+                    }
+                  }
+                ]
+              });
+              
+            }, 4000);
+          });
+        });
+      </script>
+    </section>  
+    
+    
+ 
+
+    {% include 'product-reviews' %}
+
+  </div>
+</div>
+
+<!-- <script type="application/json" id="variant__inv">{"variants":[{% for variant in product.variants %}{"id":{{variant.id}},"inv":{{variant.inventory_quantity}}}{% unless forloop.last %},{% endunless%}{% endfor %}],"threshold":"{{ section.settings.low_stock_threshold}}","message":"{{ section.settings.low_stock_message}}"}</script> -->
+<script type="application/json" id="variant__inv">{"variants":[{% for variant in product.variants %}{"id":{{variant.id}}, "option1":"{{variant.option1}}", "option2":"{{variant.option2}}", "inv":{{variant.inventory_quantity}}}{% unless forloop.last %},{% endunless%}{% endfor %}],"threshold":"{{ section.settings.low_stock_threshold}}","message":"{{ section.settings.low_stock_message}}"}</script>
+
+{% schema %}
+  {
+    "name": "Product",
+    "settings": []
+  }
+{% endschema %}

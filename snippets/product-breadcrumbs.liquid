@@ -1,0 +1,31 @@
+{% assign prod_base_collection = product.metafields.milly.base_collection %}
+{% assign breadcrumb_collection = '' %}
+{% assign breadcrumbs = '' %}
+
+{% if collection %}
+  {% assign breadcrumbs = collection.metafields.milly.breadcrumb %}
+{% else %}
+  {% if prod_base_collection != blank %}
+    {% assign breadcrumbs = collections[product.metafields.milly.base_collection].metafields.milly.breadcrumb %}
+  {% endif %}
+{% endif %}
+
+<div class="page-utility page-utility--product">
+  <div class="clearfix">
+    {% if breadcrumbs != blank %}
+      {% assign crumbs = breadcrumbs | split: '|' %}
+      <nav class="breadcrumbs{% if location == 'product' %} breadcrumbs--product{% endif %}" role="navigation" aria-label="breadcrumbs">
+        <div class="container--wide">
+          <a href="/collections/all">Shop</a><span aria-hidden="true">/</span>
+          {% for crumb in crumbs %}
+            <a href="/collections/{{ crumb | split: ':' | last }}">{{ crumb | split: ':' | first }}</a>
+            <span aria-hidden="true">/</span>
+          {% endfor %}
+          <span class="active-breadcrumb">{{ product.title }}</span>
+        </div>
+      </nav>
+    {% else %}
+      {% include 'breadcrumbs' location: 'product' %}
+    {% endif %}
+  </div>
+</div>

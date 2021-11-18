@@ -1,0 +1,77 @@
+<div class="mobile-navigation">
+  <div class="mobile-navigation__header">
+    <button class="btn btn--text-only btn--small mobile-navigation__close mobile-menu-toggle">
+      <span class="visually-hidden">Close Mobile Navigation</span>
+      {% include 'icon', handle: 'close' %}
+    </button>
+  </div>
+
+  <nav  role="navigation">
+    <ul class="mobile-navigation__list">
+      {% for link in linklists[section.settings.main_linklist].links %}
+        <li class="mobile-navigation__list-item mobile-navigation__list-item--level-1{% if link.links.size > 0 %} has-children{% endif %}">
+          {% if link.links.size > 0 %}
+            <a href="{{ link.url }}" class="tu fw2 ls1">{{ link.title }}</a>
+            <button class="btn btn--text-only btn--small mobile-navigation__sub-list-toggle" data-mobile-menu-toggle aria-haspopup="true" aria-expanded="false">
+              <span class="visually-hidden">Toggle Sub Navigation</span>
+              {% include 'icon', handle: 'chevron-down' %}
+            </button>
+          {% else %}
+            <a href="{% if link.url == '#' %}/{% else %}{{ link.url }}{% endif %}" class="tu fw2 ls1">{{ link.title }}</a>
+          {% endif %}
+
+          {% if link.links.size > 0 %}
+            <ul class="mobile-navigation__list--level-2">
+              {% for sub_link in link.links %}
+                <li class="mobile-navigation__list-item{% if sub_link.links.size > 0 %} mobile-navigation__list-item--level-2 has-children{% else %} mobile-navigation__list-item--level-3{% endif %}">
+                  <a href="{% if sub_link.url == '#' %}/{% else %}{{ sub_link.url }}{% endif %}" class="{% if sub_link.links.size > 0 %}fw2{% endif %}">{{ sub_link.title }}</a>
+                  {% if sub_link.links.size > 0 %}
+                    <ul class="mobile-navigation__list--level-3">
+                      {% for sub_sub_link in sub_link.links %}
+                        <li class="mobile-navigation__list-item mobile-navigation__list-item--level-3">
+                          <a href="{% if sub_sub_link.url == '#' %}/{% else %}{{ sub_sub_link.url }}{% endif %}">{{ sub_sub_link.title }}</a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+      <li class="mobile-navigation__list-item mobile-navigation__list-item--level-1 has-children">
+        {% if customer %}
+          <button class="tu fw2 ls1 btn btn--text-only" aria-haspopup="true" aria-expanded="false" data-mobile-menu-toggle>My Account</button>
+          <button class="btn btn--text-only btn--small mobile-navigation__sub-list-toggle" aria-haspopup="true" aria-expanded="false">
+            <span class="visually-hidden">Toggle Sub Navigation</span>
+            {% include 'icon', handle: 'chevron-down' %}
+          </button>
+          <ul class="mobile-navigation__list--level-2">
+            <li class="mobile-navigation__list-item mobile-navigation__list-item--level-3">
+              <a href="/account/orders">Order History</a>
+            </li>
+            <li class="mobile-navigation__list-item mobile-navigation__list-item--level-3">
+              <a href="{{ routes.account_addresses_url }}">Addresses</a>
+            </li>
+            <li class="mobile-navigation__list-item mobile-navigation__list-item--level-3">
+              <a href="#swym-wishlist">Wishlist</a>
+            </li>
+            <li class="mobile-navigation__list-item mobile-navigation__list-item--level-3">
+              <a href="{{ routes.account_logout_url }}">Logout</a>
+            </li>
+          </ul>
+        {% else %}
+        
+          <a href="{{ routes.account_login_url }}" class="tu fw2 ls1">Sign Up / Log In</a>
+        {% endif %}
+      </li>
+       {% if customer %}
+      {% else %}
+       <li class="mobile-navigation__list-item mobile-navigation__list-item--level-1">
+              <a href="#swym-wishlist" class="tu fw2 ls1">Wishlist</a>
+            </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>

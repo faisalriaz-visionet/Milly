@@ -1,0 +1,31 @@
+{% include 'faq' %}
+
+{% schema %}
+{
+  "name": "Terms of Use FAQs",
+  "blocks": [
+      {
+        "type":"faq",
+        "name":"FAQ",
+        "settings":[
+          {
+            "type":"text",
+            "id":"title",
+            "label":"FAQ Title"
+          },
+          {
+            "type":"richtext",
+            "id":"answer",
+            "label":"FAQ Answer"
+          },
+          {
+            "type":"textarea",
+            "id":"answer_table",
+            "label":"FAQ Answer Table",
+            "info":"If you need to insert an HTML table, you can append it to the end of the Answer here."
+          }
+        ]
+      }
+    ]
+}
+{% endschema %}

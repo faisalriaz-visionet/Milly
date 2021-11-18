@@ -1,0 +1,120 @@
+<div class="collection-main">
+  <div class="row row--gutters products">
+    <div class="collection-loading"></div>
+    {% comment %}
+
+    {% if collection.products.size < 1 %}
+      <p class="no-products column--xs-12">Sorry, nothing is available at the moment.</p>
+    {% else %}
+      {% for prod in collection.products %}
+        {% include 'product-loop', classes: "column--xs-6 column--md-4", index: forloop.index %}
+      {% endfor %}
+    {% endif %}
+
+    {% endcomment %}
+  </div>
+
+  {% if collection.description != blank %}
+    <div class="collection-description">
+      {{ collection.description }}
+    </div>
+  {% endif %}
+</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $(window).on('load', function() {
+          setTimeout(function(){ 
+            $('#nosto-categorypage-bottom .product-listing__items').slick({
+                centerMode: false,
+                centerPadding: '10px',
+                slidesToShow: 4,
+                dots: false,
+                arrows: false,
+                responsive: [
+                  {
+                    breakpoint: 768,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '10px',
+                      slidesToShow: 2
+                    }
+                  },
+                  {
+                    breakpoint: 480,
+                    settings: {
+                      arrows: false,
+                      centerMode: true,
+                      centerPadding: '10px',
+                      slidesToShow: 2
+                    }
+                  }
+                ]
+              });
+          }, 4000);
+        });
+      });
+//           document.addEventListener('DOMContentLoaded', function() {
+//         $(window).on('load', function() {
+//           setTimeout(function(){ 
+//             $('#nosto-categorypage-bottom .product-listing__items').slick({
+//                 centerMode: false,
+//                 centerPadding: '10px',
+//                 slidesToShow: 4,
+//                 dots: false,
+//                 arrows: false,
+//                 responsive: [
+//                   {
+//                     breakpoint: 768,
+//                     settings: {
+//                       arrows: false,
+//                       centerMode: true,
+//                       centerPadding: '10px',
+//                       slidesToShow: 2
+//                     }
+//                   },
+//                   {
+//                     breakpoint: 480,
+//                     settings: {
+//                       arrows: false,
+//                       centerMode: true,
+//                       centerPadding: '10px',
+//                       slidesToShow: 2
+//                     }
+//                   }
+//                 ]
+//               });
+//           }, 4000);
+//         });
+//       });
+
+            
+            
+//            $('#nosto-categorypage-bottom .product-listing__items').slick({
+//   infinite: false,
+//   slidesToShow: 4,
+//              arrows: false,
+//   slidesToScroll: 1
+// }); 
+            
+            
+            
+            
+            
+//             var width = $(window).width();
+//             if (width < 767) {
+//               var slider = new REBASE.theme.ProductListing({
+//                 container: $('#nosto-categorypage-bottom'),
+//                 rowClass: '.product-listing__items',
+//                 itemClass: '.product-listing__item',
+//                 navClass: '.product-listing__nav',
+//                 gutterWidth: 20,
+//                 perRow: 3
+//               });
+//             }
+//     console.log('working');
+//           }, 4000);
+//         });
+//       });
+    </script>

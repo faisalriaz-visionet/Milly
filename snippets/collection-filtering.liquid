@@ -1,0 +1,118 @@
+<div class="collection-filters">
+    <h4 class="subheading">Shop By Category</h4>
+    <div class="widget widget--filtering">
+      {% for block in section.blocks %}
+        {% if block.type == 'category' %}
+          {% assign allowed = block.settings.allowed_collections %}
+          {% assign show_categories = false %}
+
+          {% if allowed != blank %}
+            {% if allowed contains current_handle %}
+              {% assign show_categories = true %}
+            {% endif %}
+          {% endif %}
+
+          {% if show_categories %}
+            <div class="filtering-group">
+              <ul class="filtering-list filtering-list-items">
+                {% for link in linklists[block.settings.link_list].links %}
+                  <li class="filtering-list-item filtering-list-item--link"><a href="{{ link.url }}">{{ link.title }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <div class="collection-filters">
+    <h4 class="subheading">Refine By</h4>
+
+    <div class="widget widget--filtering">
+      <div class="filtering-group filtering-group--clear"{% unless current_tags.size %} style="display: none;"{% endunless %}>
+        <h3 class="filtering-group__title">&times; Clear Filters</h3>
+      </div>
+
+      {% for block in section.blocks %}
+        {% if block.type == 'facet' %}
+
+          {% assign filters = '' %}
+          {% assign all_filter_tags = '' %}
+          {% assign show_filters = true %}
+          {% assign allowed = block.settings.allowed_collections %}
+          {% assign disallowed = block.settings.disallowed_collections %}
+          {% assign filters = block.settings.filters | replace: ' ,', ',' | replace: ', ', ',' | split: ',' | uniq %}
+
+          {% comment %} If we've explicitedly set an allowed list, only show if collection matches {% endcomment %}
+          {% if allowed != blank %}
+            {% assign show_filters = false %}
+            {% if allowed contains current_handle %}
+              {% assign show_filters = true %}
+            {% endif %}
+          {% endif %}
+
+          {% comment %} Hide if disallowed collection {% endcomment %}
+          {% if disallowed contains current_handle %}
+            {% assign show_filters = false %}
+          {% endif %}
+
+          {% comment %} Build an index of all available tags for this filter {% endcomment %}
+          {% for filter in filters %}
+            {% for tag in collection.tags %}
+              {% assign tag_facet_handle = tag | split: ':' | last | handleize %}
+              {% assign filter_handle = filter | handleize %}
+              {% if tag_facet_handle == filter_handle %}
+                {% capture all_filter_tags %}{{ all_filter_tags }},{{ filter_handle }},{% endcapture %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {% assign all_filter_tags = all_filter_tags | remove_first: ',' | split: ',' %}
+
+          {% comment %} Check that our filter group actually has any tags in the collection, if not hide it {% endcomment %}
+          {% assign has_filter_tags = false %}
+          {% for filter in filters %}
+            {% assign filter_handle = filter | handleize %}
+            {% if all_filter_tags contains filter_handle %}
+              {% assign has_filter_tags = true %}
+            {% endif %}
+          {% endfor %}
+
+          {% if show_filters and has_filter_tags %}
+            <div class="filtering-group filtering-group--{{ block.settings.title | handleize }}">
+              <h3 class="filtering-group__title" data-original-text="{{ block.settings.title }}">
+                <span>{{ block.settings.title }}</span>
+              </h3>
+              <ul class="filtering-list filtering-list-items filtering-list--{{ block.settings.title | handleize }}">
+                {% for filter in filters %}
+                  {% assign group = block.settings.title | handleize %}
+                  {% assign filter_handle = filter | handleize %}
+                  {% assign full_filter = filter_handle | prepend: ':' | prepend: group %}
+
+                  {% comment %} Only show filter if tag exists in collection {% endcomment %}
+                  {% if all_filter_tags contains filter_handle %}
+                    {% if group == 'color' %}
+                      <li class="filtering-list-item{% if current_tags contains full_filter %} filtering-list-item--selected{% endif %}" data-group="{{ group }}" data-value="{{ full_filter }}" data-label="{{ filter }}">
+                        {% assign swatch_name = 'swatch_' | append: filter_handle | append: '.png' %}
+                        <img src="{{ swatch_name | file_img_url: '40x' }}" alt="{{ filter }} Swatch" />
+                      </li>
+                    {% else %}
+                      <li class="filtering-list-item{% if current_tags contains full_filter %} filtering-list-item--selected{% endif %}" data-group="{{ group }}" data-value="{{ full_filter }}" data-label="{{ filter }}">{{ filter }}</li>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          {%endif %}
+        {%endif %}
+      {% endfor  %}
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          window.REBASE = window.REBASE || {};
+          REBASE.theme = REBASE.theme || {};
+          REBASE.theme.collection = REBASE.theme.collection || {};
+          REBASE.theme.collection.url = "{{ collection.url }}";
+          REBASE.theme.collection.initialTags = {{ current_tags | json }};
+        })
+      </script>
+    </div>
+  </div>

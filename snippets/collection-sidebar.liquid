@@ -1,0 +1,137 @@
+{% assign filter_groups = 'Size|Length|Color|Price' | split: '|' %}
+{% assign size_values_1 = '0,2,4,6,8,10,12,14' | split: ',' %}
+{% assign size_values_2 = 'P,S,M,L,XL' | split: ',' %}
+{% assign length_values = 'Mini,Midi,Maxi' | split: ',' %}
+{% assign color_values = 'Black,Blue,Brown,Green,Grey,Multi,Orange,Pink,Purple,Red,White,Yellow' | split: ',' %}
+{% assign price_values = '$80 TO $100,$80 TO $100,$100 TO $200,$200 TO $300,$300 TO $400,$400 TO $500,$500 TO $750' | split: ',' %}
+{% assign selected_values = '0,Mini,Black,$80 TO $100' | split: ',' %}
+
+<aside class="collection-sidebar">
+   {% comment %}
+
+
+  <div class="filter-container">
+    <button class="mobile-filter-close filter-toggle btn btn--text-only">{% include 'icon', handle: 'close' %}</button>
+    <h4 class="h7 filter-count">Filters (4)</h4>
+    {% for group in filter_groups %}
+      <div class="filter-panel filter-panel--collapsed" aria-haspopup="true" aria-expanded="false">
+        <div class="filter-panel__header">
+          <span>{{ group }}</span>
+          <button class="filter-panel__header-btn"><span class="visually-hidden">Toggle Filter Panel</span><span role="presentation">{% include 'icon', handle: 'chevron-down' %}</span></button>
+        </div>
+        <div class="filter-panel__body">
+          <div class="filter-panel__list-root{% if group == 'Size' %} filter-panel__list-root--columns{% endif %}">
+            {% case group %}
+              {% when 'Size' %}
+                <ul class="filter-panel__list">
+                  {% for value in size_values_1 %}
+                    <li class="filter-panel__list-item{% if forloop.index == 1 %} filter-panel__list-item--selected{% endif %}">
+                      <div>
+                        <div class="form__field form__field--checkbox">
+                          <label for="{{ group | handle }}_{{ value | handle }}" class="filter-panel__list-item-label">
+                            <input type="checkbox" class="filter-panel__list-item-checkbox" id="{{ group | handle }}_{{ value | handle }}"{% if forloop.index == 1 %}checked{% endif %}>
+                            <span class="checkmark" role="presentation"></span>
+                            {{ value }} <span class="count">(0)</span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+                <ul class="filter-panel__list">
+                  {% for value in size_values_2 %}
+                    <li class="filter-panel__list-item">
+                      <div>
+                        <div class="form__field form__field--checkbox">
+                          <label for="{{ group | handle }}_{{ value | handle }}" class="filter-panel__list-item-label">
+                            <input type="checkbox" class="filter-panel__list-item-checkbox" id="{{ group | handle }}_{{ value | handle }}">
+                            <span class="checkmark" role="presentation"></span>
+                            {{ value }} <span class="count">(0)</span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% when 'Length' %}
+                <ul class="filter-panel__list">
+                  {% for value in length_values %}
+                    <li class="filter-panel__list-item{% if forloop.index == 1 %} filter-panel__list-item--selected{% endif %}">
+                      <div>
+                        <div class="form__field form__field--checkbox">
+                          <label for="{{ group | handle }}_{{ value | handle }}" class="filter-panel__list-item-label">
+                            <input type="checkbox" class="filter-panel__list-item-checkbox" id="{{ group | handle }}_{{ value | handle }}"{% if forloop.index == 1 %}checked{% endif %}>
+                            <span class="checkmark" role="presentation"></span>
+                            {{ value }} <span class="count">(0)</span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% when 'Color' %}
+                <ul class="filter-panel__list">
+                  {% for value in color_values %}
+                    <li class="filter-panel__list-item{% if forloop.index == 1 %} filter-panel__list-item--selected{% endif %}">
+                      <div>
+                        <div class="form__field form__field--checkbox">
+                          <label for="{{ group | handle }}_{{ value | handle }}" class="filter-panel__list-item-label">
+                            <input type="checkbox" class="filter-panel__list-item-checkbox" id="{{ group | handle }}_{{ value | handle }}"{% if forloop.index == 1 %}checked{% endif %}>
+                            <span class="checkmark" role="presentation"></span>
+                            {{ value }} <span class="count">(0)</span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% when 'Price' %}
+                <ul class="filter-panel__list">
+                  {% for value in price_values %}
+                    <li class="filter-panel__list-item{% if forloop.index == 1 %} filter-panel__list-item--selected{% endif %}">
+                      <div>
+                        <div class="form__field form__field--checkbox">
+                          <label for="{{ group | handle }}_{{ value | handle }}" class="filter-panel__list-item-label">
+                            <input type="checkbox" class="filter-panel__list-item-checkbox" id="{{ group | handle }}_{{ value | handle }}"{% if forloop.index == 1 %}checked{% endif %}>
+                            <span class="checkmark" role="presentation"></span>
+                            {{ value }} <span class="count">(0)</span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+            {% endcase %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="filter-panel filter-panel--current">
+      <div class="filter-panel__header"></div>
+      <div class="filter-panel__body">
+        <div class="filter-panel__list-root">
+          <ul class="filter-panel__list">
+            {% for value in selected_values %}
+              <li class="filter-panel__list-item filter-panel__list-item--selected">
+                <div>
+                  <div class="form__field form__field--checkbox">
+                    <label for="{{ group | handle }}_{{ value | handle }}" class="filter-panel__list-item-label">
+                      <input type="checkbox" class="filter-panel__list-item-checkbox" id="{{ group | handle }}_{{ value | handle }}" checked>
+                      <span class="checkmark" role="presentation"></span>
+                      {{ value }} <span class="count">(0)</span>
+                    </label>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <button class="btn btn--block btn--secondary mobile-filter-apply filter-toggle ls2">See Results</button>
+        <button class="btn btn--text-only btn--small filter-clear ls2">Clear Filters</button>
+      </div>
+    </div>
+  </div>
+  {% endcomment %}
+</aside>
+

@@ -1,0 +1,152 @@
+{% liquid
+  assign variant = prod.variants.first
+
+  for tag in prod.tags
+    if tag contains 'persistent_note_'
+      assign has_persistent_note = true
+      break
+    endif
+  endfor
+%}
+
+<article
+  itemtype="http://schema.org/Product"
+  itemscope="itemscope"
+  class="{% if prod.available == false%}product--unavailable {% endif %}column {% if classes %}{{ classes }}{% else %}column--xs-12 column--sm-6 column--sm-stretch column--md-4 column--md-stretch column--lg-3 column--lg-stretch{% endif %} product product--{{ prod.id }} product--{{ forloop.index }}{% if prod.compare_at_price_max > prod.price %} product--on-sale{% endif %}"
+  {% if template contains 'collection' or template contains 'index' %} data-prod-id="{{ prod.id }}"{% endif %}
+  aria-label="{{ prod.title | escape }}"
+>
+  <div class="product__content">
+    {% unless simple == true %}
+      {% include 'swym-product-view', product: prod %}
+      <button class="product__wishlist swym-button swym-add-to-wishlist-view-product product_{{prod.id}}" data-swaction="addToWishlist" data-product-id="{{prod.id | json}}">
+        <span class="visually-hidden">Wishlist</span>
+      </button>
+    {% endunless %}
+    <a itemprop="url" href="{{ prod.url | within: collection }}" title="{{ prod.title | strip_html | escape }}">
+      <div class="product__image-wrapper">
+        {% assign featured_image = prod.selected_or_first_available_variant.featured_image | default: prod.featured_image %}
+        <img
+          itemprop="image"
+          class="product__image product__image--{{ prod.id }} product__image--primary lazy"
+          data-src="{{ prod.featured_image | img_url: '800x' }}"
+          data-default-image="{{ prod.featured_image | img_url: '800x' }}"
+          alt="{% if prod.featured_image.alt != blank %}{{ prod.featured_image.alt | escape }}{% else %}{{ prod.title | escape}}{% endif %}"
+        >
+        {% if prod.images[1] %}
+          <img
+            itemprop="image"
+            class="product__image product__image--{{ prod.id }} product__image--secondary lazy"
+            data-src="{{ prod.images[1] | img_url: '800x' }}"
+            data-default-image="{{ prod.images[1] | img_url: '800x' }}"
+            alt="{% if prod.images[1].alt != blank %}{{ prod.images[1].alt | escape }}{% else %}{{ prod.title | escape}}{% endif %}"
+          >
+        {% endif %}
+        {% if template contains 'collection' %}
+          <button class="product__quick-view-button btn btn--quick-view ls2" data-product-handle="{{ prod.handle }}" data-product-id="{{ prod.id }}" data-product-index="{{ index }}">Quick View</button>
+        {% endif %}
+      </div>
+
+      {% unless simple == true %}
+        <header class="product__header">
+          <h2 class="product__title {% if template contains 'collection' %} fw2 tu{% else %} fw1{% endif %}" itemprop="name">{{ prod.title }}</h2>
+
+          {% render 'okendo-reviews-product-rating-summary' product: prod %}
+
+          <div class="product__pricing" itemprop="offers" itemtype="http://schema.org/Offer" itemscope="itemscope">
+            {% if prod.available %}
+              <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+              {% if prod.compare_at_price_max > prod.price %}
+                <span class="product__price product__price--old" aria-label="Deleted text - old price">{% if variant.compare_at_price > 0 %}{{ variant.compare_at_price | money }}{% endif %}</span>
+              {% endif %}
+              <span class="product__price product__price--current{% if prod.compare_at_price_max > prod.price %} product__price--sale{% endif %}" itemprop="price">{{ variant.price | money }}</span>
+            {% else %}
+              <span class="product__price product__price--current visually-hidden" itemprop="price">{{ variant.price | money }}</span>
+              <span class="product__price product__price--sold-out">Out of Stock</span>
+            {% endif %}
+          </div>
+
+          {% if has_persistent_note == true %}
+            <div class="product__notes">
+              {% for tag in prod.tags %}
+                {% if tag contains 'persistent_note' %}
+                  <h4 class="product__note persistent-note tu ls2 fw1">{{ tag | remove: 'persistent_note_' }}</h4>
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% unless swatches == false %}
+            <div class="product__swatches">
+              {% for option in prod.options_with_values %}
+                {% if option.name == 'Color' or option.name == 'COLOR' %}
+                  {% if option.values.size > 1 %}
+                    {% for value in option.values %}
+                      {% capture position_key %}option{{ option.position }}{% endcapture %}
+                      {% assign swatch_variant = '' %}
+                      {% for swatch_var in prod.variants %}
+                        {% if swatch_var[position_key] == value and swatch_var.available %}
+                          {% assign swatch_variant = swatch_var %}
+                          {% break %}
+                        {% endif %}
+                      {% endfor %}
+
+                      {% if swatch_variant != '' %}
+                        {% comment %} We're gathering all of the variant images that match the swatch colors here to pass as data attributes {% endcomment %}
+                        {% assign swatch_media_srcs = '' %}
+                        {% for media in prod.media %}
+                          {% assign split_filename = '' %}
+                          {% if media.media_type == 'image' %}
+                            {% assign split_filename = media.src | split: 'products/' | last | split: '.' | first | split: '_' %}
+                            {% assign split_filename_color_index = split_filename.size | minus: 2 %}
+                            {% assign color_handle = split_filename[split_filename_color_index] | handle %}
+                            {% assign option_1_handle = swatch_variant.option1 | handle %}
+                            {% assign option_2_handle = swatch_variant.option2 | handle %}
+                            {% assign option_3_handle = swatch_variant.option3 | handle %}
+                            {% if color_handle == option_1_handle or color_handle == option_2_handle or color_handle == option_3_handle %}
+                              {% assign media_src = media | img_url: '800x' %}
+                              {% assign swatch_media_srcs = swatch_media_srcs | append: ':::' | append: media_src %}
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                        {% assign swatch_media_srcs = swatch_media_srcs | remove_first: ':::' | split: ':::' %}
+
+                        <div class="product__swatch"
+                          data-variant-image="{% if swatch_media_srcs[0] %}{{ swatch_media_srcs[0] }}{% endif %}"
+                          data-variant-image-secondary="{% if swatch_media_srcs[1] %}{{ swatch_media_srcs[1] }}{% endif %}"
+                          data-variant-url="{{ swatch_variant.url | within: collection }}"
+                          data-variant-price="{{ swatch_variant.price | money }}"
+                          data-variant-compare-at-price="{{ swatch_variant.compare_at_price | money }}"
+                          data-on-sale="{% if swatch_variant.compare_at_price > swatch_variant.price %}true{% else %}false{% endif%}"
+                        >
+                          {% assign swatch_override = '' %}
+                          {% if swatch_variant.metafields.milly.custom_swatch != blank and swatch_override == '' %}
+                            {% assign swatch_override = swatch_variant.metafields.milly.custom_swatch %}
+                          {% endif %}
+
+                          {% assign swatch_img = '' %}
+
+                          {% comment %} Default swatch uses color value handle {% endcomment %}
+                          {% assign swatch_img = value | handleize | prepend: 'swatch_' | append: '.jpg' %}
+
+                          {% comment %} If variant override exists, use it instead {% endcomment %}
+                          {% if swatch_override != '' %}
+                            {% assign swatch_img = swatch_override %}
+                          {% endif %}
+
+
+                          <img src="{{ swatch_img | file_img_url: '20x20', crop: 'center'  }}" alt="{{ value }} Swatch" onError="this.src = '{{ 'swatch_default.jpg' | asset_img_url: '20x20', crop: 'center' }}';" />
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endunless %}
+        </header>
+      {% endunless %}
+    </a>
+  </div>
+</article>

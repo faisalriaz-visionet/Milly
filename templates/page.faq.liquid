@@ -1,0 +1,28 @@
+<main class="content" role="main">
+  {% section 'page-banner' %}
+    <div class="container page">
+      <div class="page__content">
+        {% if page.content.size > 0 %}
+        <div class="rte">
+          {{ page.content }}
+        </div>
+        {% endif %}
+        {% case page.handle %}
+          {% when 'faqs' %}
+            {% section 'faq' %}
+          {% when 'faqs-temp' %}
+            {% section 'faq' %}
+          {% when 'returns-and-exchanges' %}
+            {% section 'faq-returns' %}
+          {% when 'international' %}
+            {% section 'faq-international' %}
+          {% when 'accessibility' %}
+            {% section 'faq-accessibility' %}
+          {% when 'privacy-policy' %}
+            {% section 'faq-privacy' %}
+          {% when 'terms-of-use' %}
+            {% section 'faq-terms-of-use' %}
+        {% endcase %}
+      </div>
+    </div>
+</main>

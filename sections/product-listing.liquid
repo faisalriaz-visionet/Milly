@@ -1,0 +1,112 @@
+<style>
+  .product-listing--{{ section.id }} {background-color: {{ section.settings.bg_color }};}
+  .product-listing--{{ section.id }} .section__header h2 {color: {{ section.settings.heading_color }};}
+</style>
+<section class="section section--product-listing product-listing product-listing--{{ section.id }} {{ section.settings.padding_top }} {{ section.settings.padding_bottom }}" {{ section.shopify_attributes }} >
+  {% if section.settings.title != blank %}
+    <div class="section__header product-listing__header container--wide">
+      <h2 class="h5 h4-m tu ls4">{{ section.settings.title }}</h2>
+    </div>
+  {% endif %}
+
+  <div class="product-listing__items">
+    {% for prod in collections[section.settings.collection].products limit: section.settings.limit %}
+      {% include 'product-loop' classes: "product-listing__item", swatches: false %}
+    {% endfor %}
+  </div>
+
+  <button class="product-listing__nav" data-next><span class="visually-hidden">Next</span>{% include 'icon', handle: 'arrow-right' %}</button>
+  <button class="product-listing__nav" data-prev><span class="visually-hidden">Previous</span>{% include 'icon', handle: 'arrow-right' %}</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      $(function() {
+        var slider = new REBASE.theme.ProductListing({
+          container: $('.product-listing--{{ section.id }}'),
+          rowClass: '.product-listing__items',
+          itemClass: '.product-listing__item',
+          navClass: '.product-listing__nav',
+          gutterWidth: 20,
+          perRow: 4
+        });
+      });
+    });
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Product Listing",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Design Settings"
+    },
+    {
+      "type":"range",
+      "id":"limit",
+      "label":"Limit",
+      "min":4,
+      "max":24,
+      "step":4,
+      "info":"Number of products to show",
+      "default":12
+    },
+    {
+      "type":"select",
+      "id":"padding_top",
+      "label":"Container Padding Top",
+      "options":[
+        {"label":"None", "value":"padding-top--tight"},
+        {"label":"Tight", "value":"padded-top--tight"},
+        {"label":"Default", "value":"padded-top--default"},
+        {"label":"Large", "value":"padded-top--large"}
+      ],
+      "default":"padded-top--default"
+    },
+    {
+      "type":"select",
+      "id":"padding_bottom",
+      "label":"Container Padding Bottom",
+      "options":[
+        {"label":"None", "value":"padded-bottom--none"},
+        {"label":"Tight", "value":"padded-bottom--tight"},
+        {"label":"Default", "value":"padded-bottom--default"},
+        {"label":"Large", "value":"padded-bottom--large"}
+      ],
+      "default":"padded-bottom--default"
+    },
+    {
+      "type":"color",
+      "id":"bg_color",
+      "label":"Section Background Color",
+      "default":"#fff"
+    },
+    {
+      "type":"color",
+      "id":"heading_color",
+      "label":"Section Heading Color",
+      "default":"#000"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type":"text",
+      "id":"title",
+      "label":"Heading"
+    },
+    {
+      "type":"collection",
+      "id":"collection",
+      "label":"Collection"
+    }
+  ],
+  "presets": [{
+    "name": "Product Listing",
+    "category": "Content"
+  }]
+}
+{% endschema %}
+

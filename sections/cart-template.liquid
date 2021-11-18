@@ -1,0 +1,195 @@
+<main class="content content--no-sidebar" role="main">
+  <div class="container">
+    <section class="page-main">
+      <div class="page-header">
+        <h1 class="page-title h4 h3-m h2-xl tu fw1 center">Shopping Cart</h1>
+      </div>
+      {% if cart.item_count == 0 %}
+        <div class="page-content cart-no-products">
+          <div class="center container--slim">{{ section.settings.cart_collection_heading }}</div>
+        </div>
+      {% else %}
+        <div class="page-content">
+          <form action="/cart" method="post" id="cartform" class="row row--gutters">
+            <div class="column column--xs-12" id="cart-products">
+              <ul id="cart-items">
+                {% for item in cart.items %}
+                  <li id="cart-row-{{ item.id }}" class="cart-row">
+                    {% if forloop.index == 1 %}<script type="application/json" id="cart-item__json">{{ item | json }}</script>{% endif %}
+                    <div class="cart-column item-image-wrapper">
+                      <img class="item-image" src="{{ item.image.src | product_img_url: 'medium' }}" alt="{{ item.title | escape }}" />
+                    </div>
+                    <div class="cart-column item-header">
+                      <h3 class="item-title tu"><a href="{{ item.product.url }}" title="{{ item.product.title }}">{{ item.product.title }}</a></h3>
+                      <div class="cart__meta-text">
+                        {% unless item.variant.title contains 'Default' and item.total_discount == 0 %}
+                          {% for option in item.product.options %}
+                            <div class="item-meta"><span class="item-meta__item">{{ option }}: <span class="item-meta__option">{{ item.variant.options[forloop.index0] }}</span></span></div>
+                          {% endfor %}
+                        {% endunless %}
+                        {% if item.total_discount > 0 %}
+                          <div class="item-meta item-meta--discount">{{ item.message }} / {{ item.total_discount | money }} OFF</div>
+                        {% endif %}
+
+                        {% for p in item.properties %}
+                          {% if p.first contains 'persistent_note' or p.first contains 'isFinalSale' or p.first contains 'delivery' %}
+                            <div class="tu ls2 fw2 item-meta--final-sale">{{ p.last }}</div>
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                      <a class="btn btn--small btn--text-only btn--destructive item-delete-{{ forloop.index }}" href="/cart/change?line={{ forloop.index }}&quantity=0" title="Delete">Remove</a>
+                    </div>
+                    <div class="cart-column item-qty-price">
+                      <div class="item-qty">
+                        <div class="cart-qty">
+                          <input type="text" size="5" name="updates[]" class="cart-qty-input" id="updates_{{ forloop.index }}" value="{{ item.quantity }}" {% unless item.variant.inventory_management == blank or item.variant.inventory_policy == 'continue' %} max="{{ item.variant.inventory_quantity }}" {% endunless %} onfocus="this.select();"/>
+                          <input id="qtyminus-{{ forloop.index }}" type="button" value="–" class="qtyminus" field="quantity" />
+                          <input id="qtyplus-{{ forloop.index }}" type="button" value="+" class="qtyplus" field="quantity" />
+                        </div>
+                      </div>
+                      <div class="item-line-price">{{ item.line_price | money }} {% if item.total_discount > 0 %} <span class="item-old-price"> {{ item.original_line_price | money }}</span>{% endif %}</div>
+                    </div>
+                    <script>
+                     document.addEventListener('DOMContentLoaded', function () {
+                    (function($){
+                      $(function(){
+                        $('#qtyplus-{{ forloop.index }}').click(function(e){
+                          e.preventDefault();
+                        var currentVal = parseInt($("#updates_{{ forloop.index }}").val());
+                                                    currentVal = currentVal + 1;
+                                                    var variantIdComplete = $(this).parent().parent().parent().parent().attr('id');
+                                                  var variantId = $(this).parent().parent().parent().parent().attr('id').split('-')[2];
+                        var variantUp = parseInt(variantId); 
+                        $('body').addClass('cart-loading');
+                        $.ajax({
+                          type: 'post',
+                          url: '/cart/change.js',
+                          data: `quantity=${currentVal}&id=${variantUp}`,
+                          dataType: 'json',
+                          success(cart) {
+                            $('.cart-count').text(cart.item_count);
+                            var updateQty ='',
+                                price= '';
+                            for (let i = 0; i < cart.items.length; i++) {
+                              if (cart.items[i].id == variantUp){
+                                updateQty = cart.items[i].quantity;
+                                price = Shopify.formatMoney(cart.items[i].final_line_price)
+                              }
+                            }
+                            $('#updates_{{ forloop.index }}').val(updateQty);
+                              $('#'+variantIdComplete+' .item-line-price').text(price); 
+                            $('#cart-total-amount').text(Shopify.formatMoney(cart.total_price));
+							$('#total-cart').text(Shopify.formatMoney(cart.total_price));
+                            
+                            $('#'+variantUp+'.cart-drawer__item-qty-label').text(updateQty);
+                            $('body').removeClass('cart-loading');
+                          },
+                          error(xhr) {
+                            $('.error-message').text($.parseJSON(xhr.responseText).description);
+                          },
+                        });
+                        
+                      });
+                      $('#qtyminus-{{ forloop.index }}').click(function(e){
+                        e.preventDefault();
+                     var currentVal = parseInt($("#updates_{{ forloop.index }}").val());
+                     var variantIdComplete = $(this).parent().parent().parent().parent().attr('id');                           
+                     var variantId = $(this).parent().parent().parent().parent().attr('id').split('-')[2];
+                     var variantUp = parseInt(variantId);                       
+
+                      if (currentVal === 1){
+                        if (confirm('Would you like to remove this product from your cart?')) {
+                          window.location.href = '/cart/change?line={{ forloop.index }}&quantity=0';
+                        }
+                      }
+                      else {
+                        currentVal = currentVal - 1;
+                        $('body').addClass('cart-loading');
+                       $.ajax({
+                        type: 'post',
+                        url: '/cart/change.js',
+                        data: `quantity=${currentVal}&id=${variantUp}`,
+                        dataType: 'json',
+                        success(cart) {
+                          $('.cart-count').text(cart.item_count);
+                          var updateQty ='',
+                              price= '';
+                          for (let i = 0; i < cart.items.length; i++) {
+                            if (cart.items[i].id == variantUp){
+                              updateQty = cart.items[i].quantity;
+                              price = Shopify.formatMoney(cart.items[i].final_line_price)
+                            
+                            }
+                          }
+                          $('#updates_{{ forloop.index }}').val(updateQty);
+                            $('#'+variantIdComplete+' .item-line-price').text(price); 
+                          $('#cart-total-amount').text(Shopify.formatMoney(cart.total_price));
+                          $('#total-cart').text(Shopify.formatMoney(cart.total_price));
+                          $('#'+variantUp+'.cart-drawer__item-qty-label').text(updateQty);
+                      		$('body').removeClass('cart-loading');
+                        },
+                        error(xhr) {
+                          $('.error-message').text($.parseJSON(xhr.responseText).description);
+                        },
+                      });
+                      }
+                    });
+                  });
+                  })(jQuery)
+                  });
+                    </script>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="column column--xs-12 column--md-6 column--md-offset-6" id="cart-summary">
+              <div id="cart-actions">
+                <div id="totals">
+                  {% if cart.total_discount > 0 %}
+                    <div class="total-row clearfix total-row--sub-total">
+                      <span class="total-row__title">Sub Total </span> <span class="total-row__value">{{ cart.original_total_price | money }}</span>
+                    </div>
+                    <div class="total-row clearfix total-row--savings">
+                      <span id="cart-saving-amount" class="total-row__title" data-savings-total="{{ cart.total_discount | remove:'$' }}">Savings</span> <span class="total-row__value">-{{ cart.total_discount | money }}</span>
+                    </div>
+                  {% endif %}
+                  <div class="total-row clearfix total-row--total">
+                    <span class="total-row__title">{% if cart.total_discount > 0 %}Total{% else %}Subtotal{% endif %} </span> <span id="cart-total-amount" class="total-row__value" data-cart-total="{{ cart.total_price | remove:'$' }}">{{ cart.total_price | money }}</span>
+                  </div>
+                </div>
+                <div id="checkout-buttons" class="center">
+                  <button type="submit" id="update-cart" name="update"></button>
+                  <input type="submit" id="checkout" class="btn btn--large btn--secondary btn--block" name="checkout" value="Checkout" />
+                  {% if additional_checkout_buttons %}
+                    <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+                      {{ content_for_additional_checkout_buttons }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</main>
+
+{% schema %}
+{
+  "name": "Cart",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Empty Cart"
+    },
+    {
+      "type": "richtext",
+      "id": "cart_collection_heading",
+      "label": "Heading",
+      "default": "<p>You have no items in your shopping cart. Click <a href='/collections/all/'>here</a> to continue shopping.</p>"
+    }
+  ]
+}
+{% endschema %}

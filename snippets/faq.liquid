@@ -1,0 +1,31 @@
+<section class="section section--faq faq faq--{{ section.id }}" {{ section.shopify_attribtes }}>
+  <div class="section__content">
+    <div class="faqs">
+      {% for block in section.blocks %}
+        <div class="faq-item">
+          <h2 class="faq-item__title tu">
+            {{ block.settings.title }}
+            <span role="presentation">{% include 'icon', handle: 'chevron-down' %}</span>
+          </h2>
+          <div class="faq-item__content">
+            {{ block.settings.answer }}
+            {% if block.settings.answer_table != blank %}
+              {{ block.settings.answer_table }}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      document.addEventListener('DOMContentLoaded', function() {
+        $(document).on('click', '.faq-item__title', function() {
+          var _this = $(this);
+          _this.toggleClass('open').next().slideToggle();
+        });
+      });
+    })();
+  </script>
+</section>

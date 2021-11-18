@@ -1,0 +1,151 @@
+<header class="site-header" {{ section.shopify_attributes }}>
+  <div class="site-header__promo" data-text="{{ section.settings.promo_text | handle }}">
+    <div class="site-header__promo-wrapper" aria-live="off" role="region" aria-roledescription="carousel" aria-label="Promotions">
+      {% assign promo_bar_index = 1 %}
+      {% assign promo_count = 0 %}
+      {%- for block in section.blocks -%}{%- if block.type == 'promo_bar' -%}{% assign promo_count = promo_count | plus: 1 %}{% endif %}{% endfor %}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'promo_bar' -%}
+          <p aria-roledescription="slide" role="group" aria-label="{{ promo_bar_index }} of {{ promo_count }}" class="p-sm site-header__promo-item{% if promo_bar_index == 1 %} active{% endif %}" data-index="{{ promo_bar_index }}" {% if promo_bar_index != 1 %}style="display: none"{% endif %}>
+            {%- if block.settings.promo_url != blank -%}<a href="{{ block.settings.promo_url }}">{%- endif -%}
+              {{ block.settings.promo_text }}
+            {%- if block.settings.promo_url != blank -%}</a>{%- endif -%}
+          </p>
+          {% assign promo_bar_index = promo_bar_index | plus: 1 %}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <div class="site-header__main container--wide">
+    <div class="mobile-menu-toggle">{% include 'icon', handle: 'hamburger' %}</div>
+
+    {% if template == 'index' %}<h1 class="site-header__logo">{% else %}<div class="site-header__logo">{% endif %}
+      <a href="{{ shop.url }}">
+        <span class="visually-hidden">{{ shop.name }}</span>
+        {% include 'icon', handle: 'logo' %}
+      </a>
+    {% if template == 'index' %}</h1>{% else %}</div>{% endif %}
+
+    <nav class="site-header__nav" role="navigation">
+      {% include 'navigation', linklist: section.settings.main_linklist %}
+    </nav>
+
+    <div class="site-header__actions">
+      <button class="site-header__search-action btn btn--text-only search-text-show" data-search-toggle>
+        {% include 'icon', handle: 'search' %}
+        <span class="search-text">Search</span>
+      </button>
+      <button class="site-header__account-action site-header__account-action--logged-in" aria-haspopup="true">
+        <span class="visually-hidden">Account</span>
+        {% include 'icon', handle: 'user' %}
+      </button>
+      <button class="cart-drawer-toggle cart-drawer-toggle--icon">
+        <span class="visually-hidden">Cart</span>
+        <span class="cart-count{% if cart.item_count > 9 %} cart-count--high-qty{% endif %}">{% if cart.item_count > 0 %}{% if cart.item_count > 9 %}&#9679;{% else %}{{ cart.item_count }}{% endif %}{% endif %}</span>
+        {% include 'icon', handle: 'bag' %}
+      </button>
+      <nav class="site-header__action-dropdown" role="navigation" aria-label="Account Navigation">
+        <ul>
+          {% if customer != blank %}
+            <li><a href="/account/orders">Order History</a></li>
+            <li><a href="/account/addresses">Addresses</a></li>
+            <li><a href="#swym-wishlist">Wishlist</a></li>
+            <li><a href="/account/logout">Logout</a></li>
+          {% else %}
+            <li><a href="#swym-wishlist">Wishlist</a></li>
+            <li><a href="{{ routes.account_login_url }}">Sign Up / Log In</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="site-header__search">
+      <div class="container">
+        {% comment %}
+			<form class="site-header__search-form" action="/search" role="search">
+              {% include 'icon', handle: 'search' %}
+              <label class="visually-hidden" for="header_search_input">Search</label>
+              <input id="header_search_input" name="q" type="text" placeholder="Search" />
+              <button type="submit" class="visually-hidden">Submit</button>
+              <span data-search-toggle>{% include 'icon', handle: 'close' %}</span>
+        	</form>
+		{% endcomment %}
+        <form class="site-header__search-form" action="/collections/shop" method="get" role="search">
+          {% include 'icon', handle: 'search' %}
+          <label class="visually-hidden" for="header_search_input">Search</label>
+          <input id="header_search_input" name="q" type="text" placeholder="Search" />
+          <button type="submit" class="visually-hidden">Submit</button>
+          <span data-search-toggle>{% include 'icon', handle: 'close' %}</span>
+        </form>
+      </div>
+    </div>
+  </h1>
+</header>
+
+{% include 'navigation-mobile', linklist: section.settings.main_linklist %}
+
+{% schema %}
+{
+  "name": "Header",
+  "settings":[
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type":"link_list",
+      "id":"main_linklist",
+      "label":"Main Menu"
+    }
+  ],
+  "blocks":[
+    {
+      "type":"promo_bar",
+      "name":"Promo Bar Item",
+      "settings":[
+        {
+          "type":"text",
+          "id":"promo_text",
+          "label":"Promo Bar Text",
+          "info":"Leave blank to hide."
+        },
+        {
+          "type":"url",
+          "id":"promo_url",
+          "label":"Promo Bar URL",
+          "info":"Leave blank for no link"
+        }
+      ]
+    },
+    {
+      "type":"nav_promo",
+      "name":"Nav Promo Item",
+      "settings":[
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Link Text"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link URL"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Please upload at least a 800x600 JPG image."
+        },
+        {
+          "type": "text",
+          "id": "nav_item",
+          "label": "Nav Item",
+          "info": "Must match the text of the top level nav item to place this promo beneath"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

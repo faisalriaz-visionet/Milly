@@ -1,0 +1,66 @@
+{% assign current = article.handle %}
+{% assign count = 0 %}
+
+<div class="container--wide related-articles">
+  <h3 class="tu fw1 h3 h2-m">More Like This</h3>
+  <div class="related-articles--items row row--gutters"></div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function getRandomArticles(arr) {
+      var length = arr.length, index, temp;
+      if ( length === 0 ) return false;
+
+      while (--i) {
+        index = Math.floor(Math.random()*(length + 1));
+        temp = arr[length];
+        arr[length] = arr[index];
+        arr[index] = temp
+      }
+    }
+
+    var articles = [];
+    {%- for related_article in blog.articles -%}
+      {% liquid
+        assign has_article_image = true
+        if related_article.image != blank
+          assign article_image = related_article.image | img_url: '2000x'
+        else
+          assign has_article_image = false
+          assign article_image = 'article-default-image.jpg' | asset_img_url: '2000x'
+        endif
+      %}
+      {%- unless related_article.handle == current -%}
+        articles[{{ count }}] =
+        `<div class="blog-article column column--xs-12 column--md-4 ">
+            <a href="{{ related_article.url }}" title="{{ related_article.title | escape }}">
+
+              <figure class="lazy blog-article__image{% if has_article_image != true %} blog-article__image--center{% endif %}" data-bg="{{ article_image }}">
+                <figcaption class="visually-hidden">{% if related_article.image.alt != blank %}{{ related_article.image.alt | escape }}{% else %}{{ related_article.title | escape }}{% endif %}</figcaption>
+              </figure>
+            </a>
+            <div class="blog-article__content">
+              <div class="blog-article__tags">{{ related_article.tags | first | escape}}</div>
+              <h2 class="blog-article__title h3 tu fw1">
+                <a href="{{ related_article.url }}" title="{{ related_article.title | escape }}">{{ related_article.title | escape }}</a>
+              </h2>
+              <p class="blog-article__date">{{ article.published_at | date: '%B %d %Y'}}</p>
+              <a class="btn btn--text-only" href="{{ related_article.url }}" title="{{ related_article.title | escape }}">Read More</a>
+            </div>
+          </div>`;
+        {%- assign count = count | plus:1 -%}
+      {%- endunless -%}
+    {%- endfor -%}
+
+    getRandomArticles(articles);
+    if ( articles.length ) {
+      for ( var i = 0; i < 3; i++ ) {
+        $('.related-articles--items').append(articles[i]);
+      }
+    } else {
+      $('.related-articles').hide();
+    }
+
+  });
+</script>

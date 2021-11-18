@@ -1,0 +1,262 @@
+{%- layout none -%}
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+
+{% for tag in product.tags %}
+  {% if tag contains 'persistent_note_' %}
+    {% assign has_persistent_note = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+
+<div class="product-quickview">
+  <div class="product-quickview__gallery">
+    <div class="product-quickview__thumbs">
+      {% for media in product.media %}
+        {% assign split_filename = '' %}
+        {% if media.media_type == 'image' %}
+          {% assign split_filename = media.src | split: 'products/' | last | split: '.' | first | split: '_' %}
+          {% assign split_filename_color_index = split_filename.size | minus: 2 %}
+          {% assign color_handle = split_filename[split_filename_color_index] | handle %}
+          {% assign option_1_handle = current_variant.option1 | handle %}
+          {% assign option_2_handle = current_variant.option2 | handle %}
+          {% assign option_3_handle = current_variant.option3 | handle %}
+          {% if color_handle == option_1_handle or color_handle == option_2_handle or color_handle == option_3_handle %}
+            {% assign media_src = media | img_url: '800x' %}
+            {% assign thumb_media_srcs = thumb_media_srcs | append: ':::' | append: media_src %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {% assign thumb_media_srcs = thumb_media_srcs | remove_first: ':::' | split: ':::' %}
+      {% for media_src in thumb_media_srcs limit: 4 %}
+        <a href="#" data-src="{{ media_src }}">
+          <img src="{{ media_src }}" alt="{{ product.title }} Image {{ forloop.index }}" />
+        </a>
+      {% endfor %}
+    </div>
+    <div class="product-quickview__image">
+      <img src="{{ current_variant.featured_image | img_url: '1200x' }}" alt="{{ product.title }}" />
+    </div>
+  </div>
+
+  <div class="product-quickview__form">
+    <button class="product-quickview__close btn btn--text-only" onClick="window.millyToggleQuickView({})">{% include 'icon', handle: 'close' %}</button>
+    <div class="product-quickview__header">
+      <h2 class="h4 fw1">{{ product.title }}</h2>
+      {% comment %} {% include 'swym-product-view', product: product %} {% endcomment %}
+      {% comment %} <button class="product__wishlist" data-swaction="addToWishlist" data-product-id="{{product.id | json}}"> {% endcomment %}
+      {% comment %} <button class="product__wishlist product_{{product.id}}  swym-add-to-wishlist" data-swaction="addToWishlist" data-with-epi="true" data-product-id="{{product.id | json}}" data-variant-id="{{product.variants[0].id | json}}" data-product-url="{{shop.url}}{{product.url}}">
+        <span class="visually-hidden">Wishlist</span>
+      </button> {% endcomment %}
+
+      <!-- Swym Wishlist Plus EPI Button-->
+      <button
+        class="product__wishlist swym-button swym-add-to-wishlist-view-product product_{{product.id}}"
+        data-with-epi="true"
+        data-swaction="addToWishlist"
+        data-product-id="{{product.id | json}}"
+        data-variant-id="{{product.variants[0].id}}"
+        data-product-url="{{ shop.url }}{{ product.url }}"
+      >
+        <span class="visually-hidden">Wishlist</span>
+      </button>
+      <!-- Swym Wishlist Plus EPI Button-->
+
+
+      <div class="product-quickview__pricing" id="product-price-selector">
+        {% if product.available %}
+          {% if product.compare_at_price_max > product.price %}
+            <span class="product-quickview__price product-quickview__price--old product-price product-price--old" aria-label="Deleted text - old price">{% if current_variant.compare_at_price > 0 %}{{ current_variant.compare_at_price | money_without_trailing_zeros }}{% endif %}</span>
+          {% endif %}
+          <span class="product-quickview__price product-quickview__price--current product-price product-price--current{% if product.compare_at_price_max > product.price %} product-quickview__price--on-sale{% endif %}">{{ current_variant.price | money_without_trailing_zeros }}</span>
+        {% else %}
+          <span class="product-quickview__price product-quickview__price--current visually-hidden">{{ current_variant.price | money_without_trailing_zeros }}</span>
+          <span class="product-quickview__price product-quickview__price--sold-out">Out of Stock</span>
+        {% endif %}
+      </div>
+      <afterpay-placement data-locale="en_US" data-currency="USD" data-amount-selector=".product-quickview__price--current" data-badge-theme="black-on-white" data-size="sm" ></afterpay-placement>
+    </div>
+
+    {% form 'product', product, id: 'add-to-cart-form', data-cart-submit: true, data-productid: product.id %}
+      {% if product.tags contains 'final-sale:1' %}
+        <div class="tu ls2 fw2 product__final-sale">Final Sale - No Returns</div>
+        <input type="hidden" id="isFinalSale" name="properties[isFinalSale]" value="Final Sale - No Returns" />
+      {% endif %}
+
+      {% if has_persistent_note == true %}
+        <div class="product__notes">
+          {% for tag in product.tags %}
+            {% if tag contains 'persistent_note' %}
+              {% assign note = tag | remove: 'persistent_note_' %}
+              <h4 class="product__note persistent-note tu ls2 fw1">{{ note }}</h4>
+              <input type="hidden" name="properties[persistent_note]" value="{{ note }}" />
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="product-option-rows">
+        {% for option in product.options_with_values %}
+          {% assign option_index = forloop.index %}
+          {% assign option_position = option.position | prepend: 'option' %}
+          {% assign option_name_handle = option.name | handle %}
+
+          {% unless option_name_handle == 'title' %}
+
+            {% if option_name_handle == 'color' %}
+              <div class="product-option-row product-option-row--{{ option.values.size }} product-option-row--{{ option.name | handle}} product-option-row--swatches">
+                <div class="option-name p-sm tu fw2 ls2" id="option-name--option{{ option.position }}">{{ option.name }}: <span class="fw1">{{ current_variant[option_position] }}</span></div>
+                <div class="swatch option-field">
+                  {% for value in option.values  %}
+                    {% assign option_is_available = false %}
+                    {% assign swatch_override = '' %}
+                    {% for variant in product.variants %}
+                      {% if variant[option_position] == value %}
+                        {% if variant.available %}
+                          {% assign option_is_available = true %}
+                        {% endif %}
+                        {% if variant.metafields.milly.custom_swatch != blank and swatch_override == '' %}
+                          {% assign swatch_override = variant.metafields.milly.custom_swatch %}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+
+                    {% comment %}Hiding variants with NS-{% endcomment %}
+                    {%- unless value contains 'NS' -%}
+                    <div class="swatch-element {% if option.selected_value == value %}selected-swatch{%endif%} swatch-element--{{ value | handle }}{% if option_is_available == false %} swatch--unavailable{% endif %}">
+                      <input type="radio" name="single-option-select-{{ option_index }}" id="swatch-{{ option_index }}-{{ value | handle }}" value="{{ value | escape }}" data-index="option{{ option_index }}" class="single-option-select visually-hidden" {% if option.selected_value == value %}checked{% endif %}>
+                      <label for="swatch-{{ option_index }}-{{ value | handle }}" class="h7" tabindex="0" >
+                        {% assign swatch_img = '' %}
+
+                        {% comment %} Default swatch uses color value handle {% endcomment %}
+                        {% assign swatch_img = value | handleize | prepend: 'swatch_' | append: '.jpg' %}
+
+                        {% comment %} If variant override exists, use it instead {% endcomment %}
+                        {% if swatch_override != '' %}
+                          {% assign swatch_img = swatch_override %}
+                        {% endif %}
+                        <span class="visually-hidden">{{ value }}</span>
+                        <img role="button" src="{{ swatch_img | file_img_url: '20x20', crop: 'center'  }}" alt="{{ value }} Swatch" onError="this.src = '{{ 'swatch_default.jpg' | asset_img_url: '20x20', crop: 'center' }}';" />
+                      </label>
+                    </div>
+                    {%- endunless -%}
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+            <div class="{% if settings.use_color_swatch %}product-option-swatch {% else %} product-option-row {% endif %}product-option-row--{{ option.values.size }} product-option-row--{{ option.name | handle }}">
+            {% if settings.use_color_swatch %}
+            <div class="option-name p-sm tu fw2 ls2"><span>Select {{ option.name }}</span></div>
+            <div {% if settings.use_color_swatch %}id="swathes-load-id"{% endif %}>
+              {%- for value in option.values -%}
+                  {%- assign option_is_available = false -%}
+              		{%- assign option_id = '' -%}
+                  {%- for variant in product.variants -%}
+                    {%- if variant[option_position] == value -%}
+              		{%- assign option_id = variant.id -%}
+                      {%- if variant.available -%}
+                        {%- assign option_is_available = true -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+            
+                  <div id="{{option_id}}" data-varaint-id="{{option_id}}" class="dropdown__option{% unless option_is_available %} dropdown__option--sold-out{% endunless %}" tabindex="0" data-label="{{ value }}" data-position="{{ option.position}}" data-value="{{ value | escape }}">
+                    <input type="radio" name="single-option-select-{{ option_index }}" id="swatch-{{ option_index }}-{{ value | handle }}" value="{{ value | escape }}" data-index="option{{ option_index }}" class="single-option-select visually-hidden" {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="swatch-{{ option_index }}-{{ value | handle }}"><div>{{ value }}</div></label>
+                  </div>
+                {%- endfor -%}
+              </div>
+            {% else %}
+            
+            <div class="dropdown">
+              <div class="dropdown__label ls2" tabindex="0" role="button">
+                <div>
+                  <span>{{ option.name }}:</span>
+                  <span>{{ option.selected_value | default: 'Select a Size'}}</span>
+                </div>
+                {% include 'icon' handle: 'chevron-down' %}
+              </div>
+              <div class="dropdown__options">
+                {%- for value in option.values -%}
+                  {%- assign option_is_available = false -%}
+                  {%- for variant in product.variants -%}
+                    {%- if variant[option_position] == value -%}
+                      {%- if variant.available -%}
+                        {%- assign option_is_available = true -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  <div class="dropdown__option{% unless option_is_available %} dropdown__option--sold-out{% endunless %}{% if option.selected_value == value %} dropdown__option--selected{% endif %}" tabindex="0" data-label="{{ value }}" data-position="{{ option.position}}" data-value="{{ value | escape }}">
+                    <input type="radio" name="single-option-select-{{ option_index }}" id="swatch-{{ option_index }}-{{ value | handle }}" value="{{ value | escape }}" data-index="option{{ option_index }}" class="single-option-select visually-hidden" {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="swatch-{{ option_index }}-{{ value | handle }}" class="dropdown__option-label{% unless option_is_available %} back-in-stock-trigger{% endunless %}"><div>{{ value }}</div> {% unless option_is_available %}<span>Sold Out </span>{% unless product.compare_at_price_max > product.price %}<span>Notify Me When Available</span>{% endunless %}{% endunless %}</label>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+            {% endif %}
+          {% endunless %}
+        {% endfor %}
+      </div>
+
+      {% comment %} Main variant drop down (hidden) {% endcomment %}
+      {% if product.variants.size <= 1 %}
+        <input name="id" id="product-select" type="hidden" value="{{ product.variants.first.id }}" data-productid="{{product.id}}" />
+      {% else %}
+        <select name="id" id="product-select" data-productid="{{product.id}}">
+          {% for variant in product.variants %}
+          {% if variant.available %}
+            <option {% if variant == current_variant %} selected="selected" {% endif %} value="{{ variant.id }}">{{ variant.title }}</option>
+            {% else %}
+            <option disabled="disabled">{{ variant.title }} - Sold Out</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      {% endif %}
+      {% if settings.use_color_swatch %}
+      <a href="JavaScript:void(0);" class="back-in-stock-trigger"><span>Cant find your size?</span></a>
+   	{% endif %}
+  
+       {% if product.metafields.accentuate["preorder"] != blank %}
+        <input type="hidden" id="deliverydate" name="properties[delivery]" value="{{product.metafields.accentuate.preorder}}" />
+      {% endif %}
+     <div class="product-action">
+        <div class="product-action__btn">
+          <input type="hidden" name="quantity" value="1" />
+          <button name="add" id="add-to-cart" type="submit" class="btn btn--secondary btn--block">
+            <span id="add-to-cart-text" class="add-to-cart-text" data-add-to-cart-text="Add To Bag" data-sold-out-text="Sold Out">Add To Bag</span>
+          </button>
+          {% if product.metafields.accentuate["preorder"] != blank %}
+     		<div id="pre-order">{{product.metafields.accentuate.preorder}}</div>
+    	{% endif %}
+        </div>
+        <div class="center">
+          <a href="{{ product.url | within: collection }}" class="btn btn--text-only view-details-btn">View Full Details</a>
+        </div>
+        
+        
+      </div>
+    {% endform %}
+
+    <div class="product-quickview__recommendations">
+      {% comment %} <h3>You May Also Like</h3> {% endcomment %}
+      <div class="nosto_element" id="nosto-quick-view"></div>
+      <button class="product-listing__nav" data-prev><span class="visually-hidden">Previous</span>{% include 'icon', handle: 'chevron-left' %}</button>
+      <button class="product-listing__nav" data-next><span class="visually-hidden">Next</span>{% include 'icon', handle: 'chevron-right' %}</button>
+    </div>
+  </div>
+
+  {% unless product == empty %}
+    <script type="application/json" id="product__json">{{ product | json }}</script>
+  {% endunless %}
+  
+<!--   <script type="application/json" id="variant__inv">{"variants":[{% for variant in product.variants %}{"id":{{variant.id}},"inv":{{variant.inventory_quantity}}}{% unless forloop.last %},{% endunless%}{% endfor %}],"threshold":"{{ section.settings.low_stock_threshold}}","message":"{{ section.settings.low_stock_message}}"}</script> -->
+ <script type="application/json" id="variant__inv">{"variants":[{% for variant in product.variants %}{"id":{{variant.id}}, "option1":"{{variant.option1}}", "option2":"{{variant.option2}}", "inv":{{variant.inventory_quantity}}}{% unless forloop.last %},{% endunless%}{% endfor %}],"threshold":"{{ section.settings.low_stock_threshold}}","message":"{{ section.settings.low_stock_message}}"}</script>
+
+</div>
+

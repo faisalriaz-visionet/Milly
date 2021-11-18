@@ -1,0 +1,19 @@
+{% if product.metafields.milly.pairs_with %}
+  {% assign paired_product_handles = product.metafields.milly.pairs_with | split: ',' %}
+{% endif %}
+
+{% if paired_product_handles.size %}
+  <section class="section section--pairs-with">
+    <div class="section-header">
+      <h2 class="section--pairs-with-title h5">Pairs With</h2>
+    </div>
+    <div class="section-content">
+      <div class="row row--gutters products">
+        {% for handle in paired_product_handles limit: 2 %}
+          {% assign prod = all_products[handle] %}
+          {% include 'product-loop', swatches: false, badges:false %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}

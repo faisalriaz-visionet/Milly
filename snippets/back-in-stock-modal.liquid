@@ -1,0 +1,162 @@
+
+<div class="modal modal--back-in-stock">
+  <div class="modal__content">
+    <h2 class="h4 ls1 fw2 center">Can't Find Your Size? </h2>
+<!--     <h3 class="h6 ls1 fw1">Register to receive a notification when this item comes back in stock.</h3> -->
+    <p class="select-back-size">Select your size below and we'll <br/>email or text you if we get more in! <br/>please only submit an email OR a phone number</p>
+    <div class="form">
+      <h3 class="h4 ls1 fw2 center">Size </h3>
+      <ul id="back-stock-id" data-id="{{product.id}}"></ul>
+      
+      <input type="hidden" id="variant-id" value="">
+      <p class="back-message"><span>Looks like we already have the selected size in stock!</span></p>
+      
+      <div class="form__row">
+        <div class="form__field">
+          <label for="bis_email" class="visually-hidden">Email</label>
+          <input id="bis_email" type="email" placeholder="email@address.com" />
+        </div>
+      </div>
+       <div class="form__row">
+        <div class="form__field">
+          <label for="bis_phone" class="visually-hidden">SMS</label>
+          <input id="bis_phone" type="tel" name="phone" placeholder="Enter Mobile Number" />
+        </div>
+      </div>
+      {% comment %} <div class="form__row">
+        <div class="form__field form__field--checkbox">
+          <input type="checkbox" checked id="bis_add-to-list" />
+          <span class="checkmark"></span>
+          <label for="bis_add-to-list">Add me to your email list</label>
+        </div>
+      </div> {% endcomment %}
+      <div class="form__row">
+        <button class="btn btn--block" id="bis_submit">Notify me when available</button>
+      </div>
+      <div class="message"></div>
+    </div>
+    <div class="modal__close">{% render 'icon', handle: 'close' %}</div>
+  </div>
+  <div class="modal__bg"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      
+       const phoneInputField = document.querySelector("#bis_phone");
+      const phoneInput = window.intlTelInput(phoneInputField, {
+        // https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+        preferredCountries: ["us", "co", "in", "de"],
+        utilsScript:
+          "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      });
+		
+
+    
+      function openModal(e) {
+        //e.preventDefault()
+        
+        $('#back-stock-id').empty();
+        var swatches = JSON.parse(document.getElementById('variant__inv').innerHTML);
+        var cruntColor = $('.swatch-element.selected-swatch input').val();
+        var currentColorList = [];
+        for(var i = 0; i < swatches.variants.length; i++){
+          var swatchesColor = swatches.variants[i].option1;
+          var swatchesSize = swatches.variants[i].option2;
+//           var swatchesColorGet = swatchesColor.split(' ')[0];
+          if(cruntColor === swatchesColor.trim()){
+            if(swatches.variants[i].inv > 0){
+            currentColorList.push("<li class='back-swaches available' data-id="+swatches.variants[i].id+">"+swatchesSize+"</li>");
+            }else{
+              currentColorList.push("<li class='back-swaches sold-out' data-id="+swatches.variants[i].id+">"+swatchesSize+"</li>");
+            }
+          	
+            }
+        }
+        $('#back-stock-id').append(currentColorList);
+        $('.modal.modal--back-in-stock')
+          .addClass('modal--open')
+          .find('input[type="email"]').
+          focus();
+      }
+
+      function closeModal() {
+        $('.modal').removeClass('modal--open');
+      }
+      function backSwatches(e){
+      	e.preventDefault();
+        $('li.back-swaches').removeClass('swatch-selected');
+        $(this).addClass('swatch-selected');
+        if($(this).hasClass('sold-out')){
+          $('#variant-id').val($(this).data('id'));
+          $('.back-message span').hide();
+          $('#bis_submit').removeAttr('disabled');
+        
+        }else{
+          $('.back-message span').show();
+          $('#bis_submit').attr('disabled', 'disabled');
+        }
+      }
+      function createBISSubmission() {
+        var selectEl = $('#product-select'),
+          email = $('#bis_email').val(),
+          productId = selectEl.data('productid'),
+            phoneNumber = $('#bis_phone').val(),
+          variantId = $('#variant-id').val();
+              const countryCode = $('.iti__selected-flag').attr('title');
+      const currentCountryCodeList = countryCode.split(": ");
+         const currentCountryCode =  currentCountryCodeList[1];
+        
+        if(email !== null && email !== ''){
+//           debugger;÷
+                  BIS.create(email, variantId, productId).then((data) => {
+          var msg = '', status = data.status == 'OK' ? 'success' : 'error';
+
+          if (data.status == 'OK') {
+            msg = 'Thank you! We will email you when this item is available.';
+          } else {
+            for (var k in data.errors) {
+              msg += (k + " " + data.errors[k].join());
+            }
+          }
+          $('.modal.modal--back-in-stock .message').text(msg).addClass(`message--${status}`);
+          if ( data.status == 'OK' ) {
+            $('.modal.modal--back-in-stock #back-stock-id, .modal.modal--back-in-stock #bis_submit, .modal.modal--back-in-stock .modal__content h3, .modal.modal--back-in-stock .modal__content .form__row').hide();
+            setTimeout(function(){ 
+              location.reload();
+            }, 3000);
+          }
+        });
+        }else if(phoneNumber !== null){
+                BIS.create(null, variantId, productId, { phone_number: `${currentCountryCode + phoneNumber }`}).then((data) => {
+          var msg = '', status = data.status == 'OK' ? 'success' : 'error';
+
+          if (data.status == 'OK') {
+            msg = 'Thank you! We will be in contact with you when this item is available.';
+          } else {
+            for (var k in data.errors) {
+              msg += (k + " " + data.errors[k].join());
+            }
+          }
+          $('.modal.modal--back-in-stock .message').text(msg).addClass(`message--${status}`);
+          if ( data.status == 'OK' ) {
+            $('.modal.modal--back-in-stock #back-stock-id, .modal.modal--back-in-stock #bis_submit, .modal.modal--back-in-stock .modal__content h3, .modal.modal--back-in-stock .modal__content .form__row').hide();
+            setTimeout(function(){ 
+              location.reload();
+            }, 3000);
+          }
+        });
+        }
+        
+        
+        
+// debugger;
+
+      }
+
+      $(document).on('click', '.modal__close, .modal__bg', closeModal);
+      $(document).on('click', '.back-in-stock-trigger', openModal);
+      $(document).on('click', '.back-swaches', backSwatches);
+      $(document).on('click', '#bis_submit', createBISSubmission );
+    });
+  </script>
+</div>

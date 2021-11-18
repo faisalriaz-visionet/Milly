@@ -1,0 +1,39 @@
+<div class="collection-header">
+  {% include 'breadcrumbs' %}
+
+  {% comment %} <div class="collection-header__dropdown filter-toggle">
+    <div class="dropdown">
+      <div class="dropdown__label" tabindex="0" role="button">
+        <div>
+          <span>Filters (0)</span>
+          <span></span>
+        </div>
+        {% include 'icon' handle: 'chevron-down' %}
+      </div>
+    </div>
+  </div>
+  <div class="collection-header__dropdown sort">
+    {% for option in collection.sort_options %}
+      {% if option.value == collection.sort_by %}
+        {% assign selected_sort = option.name %}
+      {% endif %}
+    {% endfor %}
+
+    <div class="dropdown">
+      <div class="dropdown__label" tabindex="0" role="button">
+        <div>
+          <span>Sort:</span>
+          <span>{{ selected_sort | default: collection.sort_options[0].name }} </span>
+        </div>
+        {% include 'icon' handle: 'chevron-down' %}
+      </div>
+      <div class="dropdown__options">
+        {% for option in collection.sort_options %}
+          <div class="dropdown__option" data-label="{{ option.name }}" data-value="{{ option.value}}" tabindex="0">
+            <span class="dropdown__option-label">{{ option.name }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div> {% endcomment %}
+</div>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}" dir="{{ direction }}" class="{{ checkout_html_classes }}">
+  <head>
+    {% render 'gtm', location: 'head' %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, user-scalable=0">
+    <meta name="referrer" content="origin">
+
+    <title>{{ page_title }}</title>
+
+    {{ content_for_header }}
+
+    {{ checkout_stylesheets }}
+    {{ checkout_scripts }}
+
+
+    <style type="text/css">
+      .order-summary-toggle{
+        display: none;
+      }
+
+      .product__description__property.persistent-note {
+        display: inline-block;
+        font-family: inherit;
+        font-weight: 400;
+        color: {{ settings.persistent_note_color }};
+      }
+
+      span.product__description__property.order-summary__small-text {
+        color: red;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    {% render 'gtm', location: 'body' %}
+    {{ skip_to_content_link }}
+
+    <header class="banner" data-header role="banner">
+      <div class="wrap">
+        {{ content_for_logo }}
+      </div>
+    </header>
+
+    {{ order_summary_toggle }}
+    <div class="content" data-content>
+      <div class="wrap">
+        <div class="main">
+          <header class="main__header" role="banner">
+            {{ content_for_logo }}
+            {{ breadcrumb }}
+            {{ alternative_payment_methods }}
+          </header>
+          <main class="main__content" role="main">
+            {{ content_for_layout }}
+
+            <div class="waiver-message" style='margin: 24px 0; display:none;'>
+              <p>*All orders over $1000 require a signature at delivery. By waiving the signature required, I confirm that my package can be left by the carrier to the address provided. I take responsibility for any loss or damages that may occur by not collecting a signature.</p>
+            </div>
+          </main>
+          <footer class="main__footer" role="contentinfo">
+            {{ content_for_footer }}
+          </footer>
+        </div>
+        <aside class="sidebar" role="complementary">
+          <div class="sidebar__header">
+            {{ content_for_logo }}
+          </div>
+          <div class="sidebar__content">
+            {{ content_for_order_summary }}
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    {{ tracking_code }}
+
+    <script>
+      (function() {
+        var step = Shopify.Checkout.step;
+        var price = {{ checkout.total_price }};
+        var waiverMessageContainer = document.querySelector('.waiver-message');
+        if ( step == "shipping_method" && price >= 100000) {
+          waiverMessageContainer.style.display = "block";
+        }
+        var order_summary = document.getElementById("order-summary");
+        order_summary.classList.remove("order-summary--is-collapsed");
+
+        function addPersistentText(){
+          var Itemproperties = document.querySelectorAll('.product__description__property');
+          if(Itemproperties.length > 0){
+            Itemproperties.forEach(function($property){
+              var html_property = $property.innerHTML.trim();
+              if(html_property.indexOf('persistent_note:') > -1){
+                $property.innerHTML = html_property.replace('persistent_note:','');
+                $property.classList.add('persistent-note');
+              }
+            });
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            addPersistentText();
+            document.addEventListener("DOMSubtreeModified", function() {
+                addPersistentText();
+            });
+        });
+      })();
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $('span.product__description__property.order-summary__small-text').each(function( index ) {
+        var textSale = $( this ).text();
+        var finalText = textSale.split(':')[1];
+        $('span.product__description__property.order-summary__small-text').html(finalText);
+      });
+    </script>
+
+    <script>
+      $('.order-summary__section.order-summary__section--discount button.field__input-btn.btn').click(function(){
+        var textSale = $('span.product__description__property.order-summary__small-text').text();
+        var finalText = textSale.split(':')[1];
+        $('span.product__description__property.order-summary__small-text').html(finalText);
+      });
+      {% for property in line_item.properties %}console.log('Test', {{ property.last }});{% endfor %}
+    </script> 
+  </body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% comment %} BEGIN OneTrust Cookie {% endcomment %}
+  <!-- OneTrust Cookies Consent Notice start for milly.com -->
+  <script type="text/javascript" src="https://cdn.cookielaw.org/consent/2252cf41-9242-4cef-9d41-4b0da68d0f08/OtAutoBlock.js" defer></script>
+  <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="2252cf41-9242-4cef-9d41-4b0da68d0f08" defer></script>
+  <script type="text/javascript">function OptanonWrapper() { }</script>
+  <!-- OneTrust Cookies Consent Notice end for milly.com -->
+
+  {% comment %}
+  <!-- OneTrust Cookies Settings button start -->
+  <button id="ot-sdk-btn" class="ot-sdk-show-settings">Cookie Settings</button>
+  <!-- OneTrust Cookies Settings button end -->
+  {% endcomment %}
+
+  {% comment %}
+  <!-- OneTrust Cookies List start -->
+  <div id="ot-sdk-cookie-policy"></div>
+  <!-- OneTrust Cookies List end -->
+  {% endcomment %}
+  {% comment %} END OneTrust Cookie {% endcomment %}
+   <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"
+    />
+  
+  {% render 'gtm', location: 'head' %}
+  {% include 'head-meta' %}
+  {% include 'head-css' %}
+  {% include 'head-scripts' %}
+  {{ content_for_header }}
+
+  {% include 'okendo-reviews-json-ld' %}
+  {% if template contains 'product' or template contains 'collection' %}
+    {{ shop.metafields.okendo.ReviewsWidgetStyleTag }}
+    {{ shop.metafields.okendo.StyleCustomizations }}
+  {% endif %}
+
+  {% include 'ss-script' %}
+  
+  <meta name="google-site-verification" content="Ty-OmhIwmJPoMnaGH-mSXN0IcPE-j9JgVBUvWxXcHG0" />
+  
+  <meta name="facebook-domain-verification" content="yjzab11epstiu1kakhovhsvym1vpax" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+</head>
+
+{% comment %}Finding and adding body classes below{% endcomment %}
+{% capture bodyClasses %}{% if template contains 'customer' %}customer-template {% endif %}{{ template | split: '.' | first | remove: '/' | remove: '_' | replace:'404','error-404' }}-template {{ template | handle | replace:'.','-' | replace:'/','-' | replace:'_','-' | replace:'404','error-404' }}-template{% if template contains 'collection' %}{% if collection.image %} has-collection-image{% endif %}{% endif %}{% if customer %} customer-logged-in{% endif %}{% endcapture %}
+
+<body id="{% if template contains 'gift_card' %}gift-card-id{% else %}{{ page_title | truncatewords: 3 | handle }}-id{% endif %}" class="{{ bodyClasses | split: ' ' | uniq | join: ' ' }} {%- if collection.handle -%}ss-page{%- endif -%}">
+  <a href="#main-content" class="skip-to-content">Skip to Content</a>
+  {% render 'gtm', location: 'body' %}
+  <div class="wrapper">
+    {% section 'header' %}
+    {% comment %} {% include 'kitchen-sink' %} {% endcomment %}
+    <div id="main-content">
+      {{content_for_layout}}
+    </div>
+    {% section 'footer' %}
+  </div>
+
+  {% section 'cart-drawer' %}
+  {% include 'cart-drawer-script' %}
+
+  {% if template contains 'product' or template contains 'collection' %}
+    {% render 'size-guide-modal' %}
+    {% render 'back-in-stock-modal' %}
+  {% endif %}
+
+  {% include 'footer-scripts' %}
+
+  {% include 'nosto-tagging' %}
+
+  {% include 'ss-intellisuggest' %}
+
+  {% comment %}Loop return integration for Shop Now: On-Store Setup{% endcomment %}
+  <script src="https://unpkg.com/@loophq/onstore-sdk@latest/dist/loop-onstore-sdk.js"></script>
+  <script> 
+      LoopOnstore.init({ 
+          key: "fc298afae8836dffb797cbbaea392c88a681855f", 
+          attach: "#checkout",
+          full:true
+      });
+  </script>
+  {% comment %} Attentive Tag Script{% endcomment %}
+  <script src="https://cdn.attn.tv/milly/dtag.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<main class="content content--no-sidebar">
+  <div class="container">
+    <div class="page-main row ">
+      <div class="column column--xs-12 column--md-4 column--md-offset-4">
+        <div class="page-header center">
+          <h1 class="h4">Create Account</h1>
+        </div>
+        <div class="page-content">
+          {% form 'create_customer' %}
+            {{ form.errors | default_errors }}
+            <div class="form__row" id="first_name">
+              <div class="form__field">
+                <label for="first_name">First Name</label><br>
+                <input type="text" value="{{form.first_name}}" name="customer[first_name]" id="first_name" class="large" size="30" />
+              </div>
+            </div>
+            <div class="form__row" id="last_name">
+              <div class="form__field">
+                <label for="last_name">Last Name</label><br>
+                <input type="text" value="{{form.last_name}}" name="customer[last_name]" id="last_name" class="large" size="30" />
+              </div>
+            </div>
+            <div class="form__row" id="email">
+              <div class="form__field">
+                <label for="email">Email Address</label><br>
+                <input type="email" value="{{form.email}}" name="customer[email]" id="email" class="large" size="30" />
+              </div>
+            </div>
+            <div class="form__row" id="password">
+              <div class="form__field">
+                <label for="password">Password</label><br>
+                <input type="password" value="" name="customer[password]" id="password" class="large password" size="30" />
+              </div>
+            </div>
+            <div class="form__row" id="accepts_marketing">
+              <div class="form__field form__field--checkbox">
+                <input type="checkbox" name="customer[accepts_marketing]" checked="checked" value="true" id="marketing" />
+                <span class="checkmark"></span>
+                <label for="marketing">Keep me up to date with occasional newsletters</label>
+              </div>
+            </div>
+            <div class="form__actions center">
+              <input id="register-btn" class="btn btn--block" type="submit" value="Create" /><br>
+              <a class="btn btn--text-only" href="{{ routes.account_login_url }}" title="Login">Login</a><br>
+              <a class="btn btn--text-only" href="{{ shop.url }}" title="{{ shop.name }}">Return to store</a></span>
+            </div>
+          {% endform %}
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

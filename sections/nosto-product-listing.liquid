@@ -1,0 +1,80 @@
+<style>
+  .product-listing--{{ section.id }} {background-color: {{ section.settings.bg_color }};}
+  .product-listing--{{ section.id }} .section__header h2 {color: {{ section.settings.heading_color }};}
+</style>
+<section class="section section--product-listing product-listing product-listing--{{ section.id }} product-listing--{{ section.settings.nosto_id }} {{ section.settings.padding_top }} {{ section.settings.padding_bottom }}" {{ section.shopify_attributes }} >
+
+
+  <div class="nosto_element" id="{{ section.settings.nosto_id }}"></div>
+
+  <button class="product-listing__nav" data-next><span class="visually-hidden">Next</span>{% include 'icon', handle: 'arrow-right' %}</button>
+  <button class="product-listing__nav" data-prev><span class="visually-hidden">Previous</span>{% include 'icon', handle: 'arrow-right' %}</button>
+</section>
+
+{% schema %}
+{
+  "name": "Nosto Product Listing",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Design Settings"
+    },
+    {
+      "type":"select",
+      "id":"padding_top",
+      "label":"Container Padding Top",
+      "options":[
+        {"label":"None", "value":"padding-top--tight"},
+        {"label":"Tight", "value":"padded-top--tight"},
+        {"label":"Default", "value":"padded-top--default"},
+        {"label":"Large", "value":"padded-top--large"}
+      ],
+      "default":"padded-top--default"
+    },
+    {
+      "type":"select",
+      "id":"padding_bottom",
+      "label":"Container Padding Bottom",
+      "options":[
+        {"label":"None", "value":"padded-bottom--none"},
+        {"label":"Tight", "value":"padded-bottom--tight"},
+        {"label":"Default", "value":"padded-bottom--default"},
+        {"label":"Large", "value":"padded-bottom--large"}
+      ],
+      "default":"padded-bottom--default"
+    },
+    {
+      "type":"color",
+      "id":"bg_color",
+      "label":"Section Background Color",
+      "default":"#fff"
+    },
+    {
+      "type":"color",
+      "id":"heading_color",
+      "label":"Section Heading Color",
+      "default":"#000"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type":"text",
+      "id":"title",
+      "label":"Heading"
+    },
+    {
+      "type":"text",
+      "id":"nosto_id",
+      "label":"Nosto ID",
+      "info":"Example: frontpage-best-sellers"
+    }
+  ],
+  "presets": [{
+    "name": "Nosto Product Listing",
+    "category": "Content"
+  }]
+}
+{% endschema %}
+

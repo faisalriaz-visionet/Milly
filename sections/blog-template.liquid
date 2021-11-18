@@ -1,0 +1,82 @@
+<div class="blog">
+  {%- paginate blog.articles by 7 -%}
+    <div class="container--wide">
+      <div class="row row--gutters blog-articles{% if paginate.previous.is_link == true %} blog-articles--paged{% endif %}">
+        {% for article in blog.articles %}
+          <div class="blog-article column column--xs-12 {% if forloop.index > 1 %}column--md-4{% endif %}">
+            <a href="{{ article.url }}" title="{{ article.title }}">
+              {% liquid
+                assign has_article_image = true
+                if article.image != blank
+                  if forloop.index == 1
+                    assign article_image = article.image | img_url: '2000x'
+                  else
+                    assign article_image = article.image | img_url: '1200x'
+                  endif
+                else
+                  assign has_article_image = false
+                  if forloop.index == 1
+                    assign article_image = 'article-default-image.jpg' | asset_img_url: '2000x'
+                  else
+                    assign article_image = 'article-default-image.jpg' | asset_img_url: '1200x'
+                  endif
+                endif
+              %}
+              <figure class="lazy blog-article__image{% if has_article_image != true %} blog-article__image--center{% endif %}" data-bg="{{ article_image }}">
+                <figcaption class="visually-hidden">{% if article.image.alt != blank %}{{ article.image.alt }}{% else %}{{ article.title }}{% endif %}</figcaption>
+              </figure>
+            </a>
+            <div class="blog-article__content">
+              <div class="blog-article__tags">{{ article.tags | first }}</div>
+              <h2 class="blog-article__title h3 tu fw1">
+                <a href="{{ article.url }}" title="{{ article.title }}">{{ article.title }}</a>
+              </h2>
+              <p class="blog-article__date">{{ article.published_at | date: '%B %d %Y'}}</p>
+              {% if forloop.index == 1 %}
+                <div class="blog-article__description">
+                  {% if article.excerpt != blank %}
+                    {{ article.excerpt }}
+                  {% endif %}
+                </div>
+              {% endif %}
+              <a class="btn btn--text-only" href="{{ article.url }}" title="{{ article.url }}">Read More</a>
+            </div>
+          </div>
+          {% if forloop.index == 1 and paginate.previous == blank %}
+            <div class="column column--xs-12" style="margin-bottom: 0;">
+              <h2 class="tu fw1">{{ blog.title }}</h2>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if paginate.pages > 1 %}
+      <div class="container--wide">
+        <div class="blog-pagination">
+          {% if paginate.previous.is_link %}
+            <a class="blog-pagination__item blog-pagination__item--prev btn btn--text-only" href="{{ paginate.previous.url }}">{% include 'icon', handle: 'arrow-right' %} <span class="visually-hidden">Previous</span></a>
+          {% endif %}
+
+          {% for part in paginate.parts %}
+            {% if part.is_link %}
+              <a href="{{ part.url }}" class="blog-pagination__item">{{ part.title }}</a>
+            {% else %}
+              <div class="blog-pagination__item blog-pagination__item--current">{{ part.title }}</div>
+            {% endif %}
+          {% endfor %}
+
+          {% if paginate.next.is_link %}
+            <a class="blog-pagination__item blog-pagination__item--next btn btn--text-only" href="{{ paginate.next.url }}"><span class="visually-hidden">Next</span>{% include 'icon', handle: 'arrow-right' %}</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {%- endpaginate -%}
+</div>
+{% schema %}
+  {
+    "name": "Blog",
+    "settings": []
+  }
+{% endschema %}

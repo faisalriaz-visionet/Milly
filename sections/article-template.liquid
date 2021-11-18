@@ -1,0 +1,43 @@
+<main class="content content--no-sidebar" role="main">
+  <div class="article-header">
+    <div class="article-breadcrumbs container--wide">{% include 'breadcrumbs' %}</div>
+    <div class="center">
+      <div class="article-tags fw2">{{ article.tags | first }}</div>
+      <h1 class="h1 tu fw1">{{ article.title }}</h1>
+      <p class="article-date">{{ article.published_at | date: '%B %d %Y'}}</p>
+
+      {% liquid
+        assign has_article_image = true
+        if article.image != blank
+          assign article_image = article.image | img_url: '2000x'
+        else
+          assign has_article_image = false
+          assign article_image = 'article-default-image.jpg' | asset_img_url: '2000x'
+        endif
+      %}
+      <figure class="lazy article-image{% if has_article_image != true %} article-image--centered{% endif %}" data-bg="{{ article_image }}">
+        <figcaption class="visually-hidden">{% if article.image.alt != blank %}{{ article.image.alt }}{% else %}{{ article.title }}{% endif %}</figcaption>
+      </figure>
+    </div>
+  </div>
+
+</main>
+
+<main class="content content--no-sidebar" role="main">
+  <div class="article">
+    <div class="article__content">
+      <div class="container--mid">
+        {{ article.content }}
+      </div>
+    </div>
+  </div>
+
+  {% include 'related-articles' %}
+</main>
+
+{% schema %}
+  {
+    "name": "Article"
+  }
+{% endschema %}
+
